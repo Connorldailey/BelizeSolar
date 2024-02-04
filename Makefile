@@ -11,6 +11,7 @@ PutHTML:
 	cp solar.html /var/www/html/BelizeSolar/
 	cp solar.css /var/www/html/BelizeSolar/
 	cp solar.js /var/www/html/BelizeSolar/
+	cp jquery-3.1.1.min.js /var/www/html/BelizeSolar/
 
 
 	echo "Current contents of your HTML directory: "
