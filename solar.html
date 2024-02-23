@@ -6,7 +6,8 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no">
 		<meta http-equiv="X-UA-Compatible" content="ie=edge">
-		<title> Belize Solar </title>
+		<title> Belize Solar Project</title>
+		<link rel="icon" type="image/x-icon" href="/Images/sunFavicon.png">
 		<meta name="author" content="Connor Dailey">
 		<meta name="description" content="Describe what this website is about">
 		<link rel="stylesheet" href="./solar.css">
@@ -21,7 +22,7 @@
 		<!-- Nav Bar -->
 		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 			<div class="container-fluid">
-				<a class="navbar-brand" href="#">Belize Solar</a>
+				<a class="navbar-brand" href="#">Belize Solar Project</a>
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
@@ -33,18 +34,17 @@
 						<li class="nav-item">
 							<a class="nav-link" href="#"> Solar Overview</a>
 						</li>
-						<!-- Schools Dropdown Menu-->
+						
+						<!-- Schools Dropdown Menu -->
 						<li class="nav-item dropdown">
 							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 								Schools
 							</a>
 							<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-								<li><a class="dropdown-item" href="#">Action</a></li>
-								<li><a class="dropdown-item" href="#">Another action</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item" href="#">Solar Overview</a></li>
+								<!-- Dynamic dropdown items will be added here -->
 							</ul>
 						</li>
+
 						<li class="nav-item">
 							<a class="nav-link" href="#">Interactive Map</a>
 						</li>
@@ -62,13 +62,19 @@
 				</div>
 			</div>
 		</nav>
-		
-		<h1> This will be the main page. </h1>
-		
+
 		<div class="jumbotron">
-			<h1>Hello World</h1>
-			<div class="container">
-				<div id="schoolOutput">
+			<h1>Inside Jumbotron</h1>
+			<!-- This container is for information on the school -->
+			<div class="container border border-3 border-dark">
+				<div id="site-list"></div>
+				<div id="data-output"></div>
+				<div id="image-container"></div>
+			</div>
+			<!-- This is a test div to output total watts at all sites -->
+			<div class="container border border-3 border-dark">
+				<h1>Total watts (sum of all sites)</h1>
+				<div id="total-watts"></div>
 			</div>
 		</div>
 		
