@@ -82,6 +82,9 @@ function loadSiteInfo(siteName) {
 	console.log("Here:", siteName);
 	displaySiteInfoSection(siteName);
 	displayWattGaugeSection(siteName);
+	// Just practicing with date
+	const date =  todaysDate();
+	console.log(date);
 }
 
 // Function to display school name and picture
@@ -212,7 +215,14 @@ function fetchTotalWatts(siteName) {
     });
 }
 
-
-
+// Todays date in for yyyy-mm-dd
+function todaysDate() {
+	var today = new Date();
+	var dd = String(today.getDate()).padStart(2, '0');
+	var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+	var yyyy = today.getFullYear();
+	var date = yyyy +'-'+ mm +'-'+ dd;
+	return date;
+}
 
 
