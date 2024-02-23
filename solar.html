@@ -12,9 +12,9 @@
 		<meta name="description" content="Describe what this website is about">
 		<link rel="stylesheet" href="./solar.css">
 		<!--- Bootstrap 5 CSS -->
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 		<!-- Vanilla Datepicker CSS -->
-		<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker.min.css'>   
+			<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker.min.css'> 
 	</head>
 	
 	<!-- Begin Body -->
@@ -66,16 +66,9 @@
 		<div class="jumbotron">
 			<h1>Inside Jumbotron</h1>
 			<!-- This container is for information on the school -->
-			<div class="container border border-3 border-dark">
-				<div id="site-list"></div>
-				<div id="data-output"></div>
-				<div id="image-container"></div>
-			</div>
-			<!-- This is a test div to output total watts at all sites -->
-			<div class="container border border-3 border-dark">
-				<h1>Total watts (sum of all sites)</h1>
-				<div id="total-watts"></div>
-			</div>
+			<div id="siteInfoContainer" class="container mt-3"></div>
+			<!-- This container is for the fuel style watt gauge -->
+			<div id="wattGaugeContainer" class="container mt-3"></div>
 		</div>
 		
 		<!-- Footer -->
@@ -93,5 +86,8 @@
       	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 		<!-- Include Solar.js File -->
 		<script src="solar.js" type="text/javascript"></script>
+		<!-- Include JustGage and Raphael -->
+		<script src="raphael.2.1.0.min.js"></script>
+		<script src="justgage.1.0.1.min.js"></script>
 	</body>
 </html>	
