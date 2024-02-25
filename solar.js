@@ -1,5 +1,7 @@
 // Full Sites URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarNames()
 // Full AllWatts URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarWatts(*)
+// Full SiteInfo URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarInfo(%SITE%)
+
 const Url="http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999";
 const Sites="&Query=SolarNames()";
 const AllWatts="&Query=SolarWatts(*)";
@@ -38,7 +40,7 @@ function processSites() {
             const ref = sites[i].replace(/\d+\w*$/, '');
             if (!processedSites.includes(ref)) {
                 processedSites.push(ref);
-                console.log(ref);
+                //console.log(ref);
             }
         }
         return processedSites;
@@ -79,18 +81,15 @@ document.addEventListener('DOMContentLoaded', populateDropdown);
 
 // Function to display all page information for any school
 function loadSiteInfo(siteName) {
-	console.log("Here:", siteName);
-	displaySiteInfoSection(siteName);
+	displaySitePhotoSection(siteName);
 	displayWattGaugeSection(siteName);
-	// Just practicing with date
-	const date =  todaysDate();
-	console.log(date);
+	displaySiteInfoSection(siteName);
 }
 
 // Function to display school name and picture
-function displaySiteInfoSection(siteName) {
+function displaySitePhotoSection(siteName) {
     // Select the container where the site info will be displayed
-    const container = document.getElementById('siteInfoContainer');
+    const container = document.getElementById('sitePhotoContainer');
 
     // Clear previous content
     container.innerHTML = '';
@@ -143,7 +142,7 @@ function displayWattGaugeSection(siteName) {
             id: "gauge",
             value: " " + totalWatts,
             min: 0,
-            max: 1000,
+            max: 1500,
             title: "Current Watts",
             titleFontSize: 12,
     		titleFontColor: "black",
@@ -167,25 +166,37 @@ function displayWattGaugeSection(siteName) {
 
 // Function to fetch IDs of all systems at a site
 function fetchSystemIDs(siteName) {
-	return fetch(Url + Sites)
-		.then(response => {
-			if (!response.ok){
-				throw new Error('Network response was not ok');
-			}
-			return response.json(); // Parse the JSON in the response
-		})
-		.then(data => {
-			siteIDs = [];
-			// Loop through all sites and store names
+    return fetch(Url + Sites)
+        .then(response => {
+            if (!response.ok){
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parse the JSON in the response
+        })
+        .then(data => {
+            let siteIDs = [];
+            // Loop through all sites and store IDs
             for (const [key, value] of Object.entries(data.message)) {
-                if (value.includes(siteName)) { // Check if the site name is included in the value
+                // Directly match "Kings College" excluding "OLD Kings College"
+                if (siteName === "Kings College" && value === "Kings College") {
+                    siteIDs.push(key);
+                    // console.log("Key:", key, "Value:", value); // Log the key for debugging
+                }
+                // Match any other site name including cases like "ACES Primary 1", "New Horizons Primary 1A", etc.
+                else if (siteName !== "Kings College" && value.includes(siteName)) {
                     siteIDs.push(key); // Add the key to siteIDs if the value includes siteName
-                    console.log(key); // Log the key for debugging
+                    // console.log("Key:", key, "Value:", value); // Log the key for debugging
                 }
             }
             return siteIDs;
-		});
+        });
 }
+
+// Utility function to escape regex characters in siteName
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 
 // Fetch total watts for site (sum of system watts)
 function fetchTotalWatts(siteName) {
@@ -215,14 +226,122 @@ function fetchTotalWatts(siteName) {
     });
 }
 
-// Todays date in for yyyy-mm-dd
-function todaysDate() {
-	var today = new Date();
-	var dd = String(today.getDate()).padStart(2, '0');
-	var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-	var yyyy = today.getFullYear();
-	var date = yyyy +'-'+ mm +'-'+ dd;
-	return date;
+// Fetch general site information
+function fetchSiteInfo(siteName) {
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        // Use map instead of forEach to return an array of promises
+        let fetchPromises = siteIDs.map(ID => {
+            let MAC = shortMAC(ID);
+            let command = Url + siteInfo.replace("%SITE%", MAC);
+            return fetch(command)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the JSON in the response
+                })
+                .then(data => {
+                    // Return the desired information as an object
+                    return {
+                        location: data.message.location,
+                        contactName: data.message.contactName,
+                        contactPhone: data.message.contactPhone,
+                        contactEmail: data.message.contactEmail,
+                        numPanels: data.message.numPanels,
+                        yearInstalled: data.message.yearInstalled
+                    };
+                });
+        });
+
+        // Use Promise.all to wait for all fetch operations to complete
+        return Promise.all(fetchPromises).then(results => {
+            // Aggregate the results into a single object
+            let info = {
+                location: results[0].location,
+                contactName: results[0].contactName,
+                contactPhone: results[0].contactPhone,
+                contactEmail: results[0].contactEmail,
+                systems: results.map(result => ({ numPanels: result.numPanels, yearInstalled: result.yearInstalled }))
+            };
+            return info;
+        });
+    });
 }
+
+
+// Fetch system specific information
+function fetchSystemInfo(siteName) {
+    fetchSystemIDs(siteName).then(siteIDs => {
+        let fetchPromises = siteIDs.map(ID => {
+            let MAC = shortMAC(ID);
+            let command = Url + siteInfo.replace("%SITE%", MAC);
+            return fetch(command)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the JSON in the response
+                })
+                .then(data => {
+                    // Extract numPanels and yearInstalled from the response
+                    const numPanels = data.message.numPanels;
+                    const yearInstalled = data.message.yearInstalled;
+                    // Return an object containing both values for each system
+                    return { numPanels, yearInstalled };
+                });
+        });
+
+        Promise.all(fetchPromises).then(systemsInfo => {
+            console.log(systemsInfo); // systemsInfo is an array of objects, each containing numPanels and yearInstalled for a system
+        }).catch(error => {
+            console.error("Error fetching system info:", error);
+        });
+    }).catch(error => {
+        console.error("Error fetching system IDs:", error);
+    });
+}
+
+// Get last 6 characters of MAC
+function shortMAC(MAC) {
+	if (!MAC) {
+        throw new Error('shortMAC function received undefined input');
+    }
+	let short = MAC.substr(-6);
+	return short;
+}
+
+// Utility function to create an HTML element with text
+function createInfoElement(key, value) {
+    const element = document.createElement('p');
+    element.textContent = `${key}: ${value}`;
+    return element;
+}
+
+// Function to render site and systems information
+function displaySiteInfoSection(siteName) {
+    fetchSiteInfo(siteName).then(siteInfo => {
+        const siteInfoContainer = document.getElementById('siteInfoContainer');
+        siteInfoContainer.innerHTML = ''; // Clear existing content
+
+        // Add general site information directly accessing the object properties
+        siteInfoContainer.appendChild(createInfoElement('School Name', siteName));
+        siteInfoContainer.appendChild(createInfoElement('Location', siteInfo.location));
+        siteInfoContainer.appendChild(createInfoElement('Contact Name', siteInfo.contactName));
+        siteInfoContainer.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
+        siteInfoContainer.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
+        siteInfoContainer.appendChild(createInfoElement('Number of Systems',siteInfo.systems.length));
+        // ... Add other site info elements
+
+        // Add system-specific information
+        siteInfo.systems.forEach((system, index) => {
+            siteInfoContainer.appendChild(createInfoElement(`Number of Panels for System ${index + 1}`, system.numPanels));
+            siteInfoContainer.appendChild(createInfoElement(`Year Installed for System ${index + 1}`, system.yearInstalled));
+        });
+    });
+}
+
+
+
+
 
 
