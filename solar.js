@@ -13,7 +13,29 @@ const SolarWattsAllDayAllSites="&Query=SolarWattsAllDayAllSites(%DATE%*)";
 // &Query=SolarHistory(8B0AB1,qWattsmin1,2023-02-02*)
 // &Query=SolarHistory(SITE,qWattsmin1,DATE*)
 
-// Function to fetch and return all site names (including system number)
+// Function to display all page information for any school
+function loadSiteInfo(siteName) {
+	console.log("Today's Date:",todaysDate())
+	displaySitePhotoSection(siteName);
+	displayWattGaugeSection(siteName);
+	displaySiteInfoSection(siteName);
+}
+
+// Get last 6 characters of MAC
+function shortMAC(MAC) {
+	if (!MAC) {
+        throw new Error('shortMAC function received undefined input');
+    }
+	let short = MAC.substr(-6);
+	return short;
+}
+
+// Returns today's date (yyyy-mm-dd)
+function todaysDate() {
+    return new Date().toISOString().split('T')[0];
+}
+
+// Returns all site names (including system number)
 function fetchSites() {
     return fetch(Url + Sites) // Ensure Url and Sites are correctly defined
         .then(response => {
@@ -32,7 +54,7 @@ function fetchSites() {
         });	
 }
 
-// Function to return a list of all school names (system/site numbers removed)
+// Returns a list of all school names (system numbers removed)
 function processSites() {
     return fetchSites().then(sites => {
         let processedSites = [];
@@ -79,14 +101,7 @@ function populateDropdown() {
 // Call populateDropdown when the page is ready or when it's appropriate to load the sites
 document.addEventListener('DOMContentLoaded', populateDropdown);
 
-// Function to display all page information for any school
-function loadSiteInfo(siteName) {
-	displaySitePhotoSection(siteName);
-	displayWattGaugeSection(siteName);
-	displaySiteInfoSection(siteName);
-}
-
-// Function to display school name and picture
+// Displays the school name and picture section
 function displaySitePhotoSection(siteName) {
     // Select the container where the site info will be displayed
     const container = document.getElementById('sitePhotoContainer');
@@ -107,7 +122,7 @@ function displaySitePhotoSection(siteName) {
     // Create and append the image element
     const imageElement = document.createElement('img');
     // Use a stock image for now. Replace the 'src' attribute with your image path or URL
-    imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/schoolExample.jpeg';
+    imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/' + 'schoolExample' + '.jpeg';
     imageElement.alt = 'Site Image';
     imageElement.classList.add('img-fluid', 'rounded', 'mx-auto', 'd-block'); // Make image responsive and center it
     siteInfoDiv.appendChild(imageElement);
@@ -116,7 +131,7 @@ function displaySitePhotoSection(siteName) {
     container.appendChild(siteInfoDiv);
 }
 
-// Function to display current watts gauge
+// Displays the watt gauge section
 function displayWattGaugeSection(siteName) {
     const container = document.getElementById('wattGaugeContainer');
     container.innerHTML = ''; // Clear any existing content
@@ -164,7 +179,7 @@ function displayWattGaugeSection(siteName) {
     });
 }
 
-// Function to fetch IDs of all systems at a site
+// Returns an array of IDs for all systems at a site
 function fetchSystemIDs(siteName) {
     return fetch(Url + Sites)
         .then(response => {
@@ -188,17 +203,12 @@ function fetchSystemIDs(siteName) {
                     // console.log("Key:", key, "Value:", value); // Log the key for debugging
                 }
             }
+            //console.log(siteIDs);
             return siteIDs;
         });
 }
 
-// Utility function to escape regex characters in siteName
-function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-
-// Fetch total watts for site (sum of system watts)
+// Returns current watts for site (sum of system watts)
 function fetchTotalWatts(siteName) {
     // First, fetch the system IDs for the site
     return fetchSystemIDs(siteName).then(siteIDs => {
@@ -216,17 +226,141 @@ function fetchTotalWatts(siteName) {
                     const [key, valueStr] = entry; // Destructure the entry array to get key and value
                     if (siteIDs.includes(key)) { // Only include if the key is in the siteIDs
                         const value = parseInt(valueStr, 10); // Convert value string to number
-                        console.log(`Adding ${value} watts from system ${key}`);
+                        //console.log(`Adding ${value} watts from system ${key}`);
                         watts += value; // Add to watts if key matches
                     }
                 });
-                console.log("Total: ", watts);
+                //console.log("Total: ", watts);
                 return watts; // Return the total watts for further processing
             });
     });
 }
 
-// Fetch general site information
+// Returns a map containing current watts for each system at a site
+function fetchSystemWatts(siteName) {
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        return fetch(Url + AllWatts)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                let systemWatts = new Map();
+                data.message.forEach(entry => {
+                    const [key, valueStr] = entry;
+                    if (siteIDs.includes(key)) {
+                        const value = parseInt(valueStr, 10);
+                        systemWatts.set(key, value);
+                    }
+                });
+                //console.log(systemWatts);
+                return systemWatts;
+            });
+    });
+}
+
+// Returns a map containing the number of panels for each system at a site
+function fetchNumPanels(siteName) {
+    // First, fetch all system IDs for the given site name
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        // Map each ID to a promise that fetches the number of panels for that system
+        let promises = siteIDs.map(ID => {
+            const MAC = shortMAC(ID);
+            let command = Url + siteInfo.replace("%SITE%", MAC);
+            return fetch(command)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the JSON in the response
+                })
+                .then(data => {
+                    // Create an object that includes both the system ID and the number of panels
+                    return {id: ID, numPanels: data.message.numPanels};
+                });
+        });
+        // Use Promise.all to wait for all fetch operations to complete
+        return Promise.all(promises).then(results => {
+            // Create a Map to hold the system ID and number of panels pairs
+            let panelsMap = new Map();
+            // Populate the Map with the ID as key and the number of panels as value
+            results.forEach(result => {
+                panelsMap.set(result.id, result.numPanels);
+            });
+            //console.log(panelsMap);
+            return panelsMap; // Return the Map object
+        });
+    });
+}
+
+// Returns a map containing the year each system was installed at a site
+function fetchYearInstalled(siteName) {
+	return fetchSystemIDs(siteName).then(siteIDs => {
+		let promises = siteIDs.map(ID => {
+			const MAC = shortMAC(ID);
+			let command = Url + siteInfo.replace("%SITE%", MAC);
+			return fetch(command)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					return response.json();
+				})
+				.then(data => {
+					return {id: ID, yearInstalled: data.message.yearInstalled};
+				});
+		});
+		return Promise.all(promises).then(results => {
+			let instYearMap = new Map();
+			results.forEach(result => {
+			 	instYearMap.set(result.id, result.yearInstalled);
+			});
+			//console.log(instYearMap);
+			return instYearMap;
+		})
+	})
+}
+
+// Returns a map containing the max daily watts for each system
+function fetchMaxDailyWatts(siteName) {
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        // Map each ID to a promise that resolves to an object containing the ID and max watts for that system
+        let promises = siteIDs.map(entry => {
+            const MAC = shortMAC(entry);
+            let command = Url + siteDayWatts.replace("%SITE%", MAC).replace("%DATE%", todaysDate());
+            console.log(command); // Log the full command for debugging
+            return fetch(command)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the JSON in the response
+                })
+                .then(data => {
+                    // Find the max watts value for this system and return it along with the ID
+                    const maxWatts = Math.max(...data.message.map(entry => parseInt(entry[3], 10)));
+                    return { id: entry, maxWatts };
+                });
+        });
+
+        // Use Promise.all to wait for all promises to resolve
+        return Promise.all(promises).then(results => {
+            // Create a Map to hold the system ID and max watts pairs
+            let maxWattsMap = new Map();
+            // Populate the Map with the ID as key and the max watts as value
+            results.forEach(result => {
+                maxWattsMap.set(result.id, result.maxWatts);
+            });
+
+            console.log(maxWattsMap); // Optional: log the Map
+            return maxWattsMap; // Return the Map object
+        });
+    });
+}
+
+// Returns an object containing general system information (location and contact info)
 function fetchSiteInfo(siteName) {
     return fetchSystemIDs(siteName).then(siteIDs => {
         // Use map instead of forEach to return an array of promises
@@ -247,8 +381,6 @@ function fetchSiteInfo(siteName) {
                         contactName: data.message.contactName,
                         contactPhone: data.message.contactPhone,
                         contactEmail: data.message.contactEmail,
-                        numPanels: data.message.numPanels,
-                        yearInstalled: data.message.yearInstalled
                     };
                 });
         });
@@ -256,89 +388,87 @@ function fetchSiteInfo(siteName) {
         // Use Promise.all to wait for all fetch operations to complete
         return Promise.all(fetchPromises).then(results => {
             // Aggregate the results into a single object
-            let info = {
+            let siteInfo = {
                 location: results[0].location,
                 contactName: results[0].contactName,
                 contactPhone: results[0].contactPhone,
                 contactEmail: results[0].contactEmail,
-                systems: results.map(result => ({ numPanels: result.numPanels, yearInstalled: result.yearInstalled }))
             };
-            return info;
+            //console.log(siteInfo)
+            return siteInfo;
         });
     });
 }
 
-
-// Fetch system specific information
-function fetchSystemInfo(siteName) {
-    fetchSystemIDs(siteName).then(siteIDs => {
-        let fetchPromises = siteIDs.map(ID => {
-            let MAC = shortMAC(ID);
-            let command = Url + siteInfo.replace("%SITE%", MAC);
-            return fetch(command)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json(); // Parse the JSON in the response
-                })
-                .then(data => {
-                    // Extract numPanels and yearInstalled from the response
-                    const numPanels = data.message.numPanels;
-                    const yearInstalled = data.message.yearInstalled;
-                    // Return an object containing both values for each system
-                    return { numPanels, yearInstalled };
-                });
-        });
-
-        Promise.all(fetchPromises).then(systemsInfo => {
-            console.log(systemsInfo); // systemsInfo is an array of objects, each containing numPanels and yearInstalled for a system
-        }).catch(error => {
-            console.error("Error fetching system info:", error);
-        });
-    }).catch(error => {
-        console.error("Error fetching system IDs:", error);
-    });
-}
-
-// Get last 6 characters of MAC
-function shortMAC(MAC) {
-	if (!MAC) {
-        throw new Error('shortMAC function received undefined input');
-    }
-	let short = MAC.substr(-6);
-	return short;
-}
-
-// Utility function to create an HTML element with text
-function createInfoElement(key, value) {
-    const element = document.createElement('p');
-    element.textContent = `${key}: ${value}`;
-    return element;
-}
-
-// Function to render site and systems information
+// Display site info section
+// Display site info section
 function displaySiteInfoSection(siteName) {
+    const container = document.getElementById('siteInfoContainer');
+    container.innerHTML = ''; // Clear existing content
+
+    // Display general site information
     fetchSiteInfo(siteName).then(siteInfo => {
-        const siteInfoContainer = document.getElementById('siteInfoContainer');
-        siteInfoContainer.innerHTML = ''; // Clear existing content
-
-        // Add general site information directly accessing the object properties
-        siteInfoContainer.appendChild(createInfoElement('School Name', siteName));
-        siteInfoContainer.appendChild(createInfoElement('Location', siteInfo.location));
-        siteInfoContainer.appendChild(createInfoElement('Contact Name', siteInfo.contactName));
-        siteInfoContainer.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
-        siteInfoContainer.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
-        siteInfoContainer.appendChild(createInfoElement('Number of Systems',siteInfo.systems.length));
-        // ... Add other site info elements
-
-        // Add system-specific information
-        siteInfo.systems.forEach((system, index) => {
-            siteInfoContainer.appendChild(createInfoElement(`Number of Panels for System ${index + 1}`, system.numPanels));
-            siteInfoContainer.appendChild(createInfoElement(`Year Installed for System ${index + 1}`, system.yearInstalled));
-        });
+        container.appendChild(createInfoElement('School Name', siteName));
+        container.appendChild(createInfoElement('Location', siteInfo.location));
+        container.appendChild(createInfoElement('Contact Name', siteInfo.contactName));
+        container.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
+        container.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
     });
+	
+	// Prepare table for system specific info
+	const table = document.createElement('table');
+	table.classList.add('table');
+	const thead = document.createElement('thead');
+	const tbody = document.createElement('tbody');
+	table.appendChild(thead);
+	table.appendChild(tbody);
+	
+	// Table headers
+	const headerRow = document.createElement('tr');
+	['System ID', 'Number of Panels', 'Current Output', 'Max Output'].forEach(headerText => {
+		const header = document.createElement('th')
+		header.textContent = headerText;
+		headerRow.appendChild(header);
+	});
+	thead.appendChild(headerRow);
+	
+	// Display system specific information
+	Promise.all([
+		fetchNumPanels(siteName),
+		fetchSystemWatts(siteName),
+		fetchMaxDailyWatts(siteName)
+	]).then(([numPanelsMap, systemWattsMap, maxWattsMap]) => {
+		numPanelsMap.forEach((numPanels, systemId) => {
+			const row = document.createElement('tr');
+			const systemCell = document.createElement('td');
+			systemCell.textContent = systemId;
+			const numPanelsCell = document.createElement('td');
+			numPanelsCell.textContent = numPanels;
+			const currentOutputCell = document.createElement('td');
+			currentOutputCell.textContent = systemWattsMap.get(systemId) || 'N/A';
+			const maxOutputCell = document.createElement('td');
+			maxOutputCell.textContent = maxWattsMap.get(systemId) || 'N/A';
+			// Append rows
+			row.appendChild(systemCell);
+			row.appendChild(numPanelsCell);
+			row.appendChild(currentOutputCell);
+			row.appendChild(maxOutputCell);
+			tbody.appendChild(row);
+		});
+		container.appendChild(table);
+	})
+	.catch(error => {
+		console.error('Error fetching system information:', error);
+	});
 }
+
+// Helper function to create info elements
+function createInfoElement(label, text) {
+    const p = document.createElement('p');
+    p.innerHTML = `<strong>${label}:</strong> ${text}`;
+    return p;
+}
+
 
 
 
