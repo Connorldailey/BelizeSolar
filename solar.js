@@ -15,14 +15,22 @@ const SolarWattsAllDayAllSites="&Query=SolarWattsAllDayAllSites(%DATE%*)";
 
 // Function to display all page information for any school
 function loadSiteInfo(siteName) {
-	console.log("Today's Date:",todaysDate())
-	// Display Section
-	displaySitePhotoSection(siteName);
-	displayWattGaugeSection(siteName);
-	displaySiteInfoSection(siteName);
-	// Testing
-	fetchSiteDayWatts(siteName);
+    console.log("Today's Date:", todaysDate());
+    // Ensure DOM is fully loaded before attempting to display info
+    if (document.readyState === 'loading') {  // Loading hasn't finished yet
+        document.addEventListener('DOMContentLoaded', () => loadSiteContent(siteName));
+    } else {  // `DOMContentLoaded` has already fired
+        loadSiteContent(siteName);
+    }
 }
+
+function loadSiteContent(siteName) {
+    displaySitePhotoSection(siteName);
+    displayWattGaugeSection(siteName);
+    displaySiteInfoSection(siteName);
+    displayDailyWattsGraph(siteName); // Directly call this if siteName is available
+}
+
 
 // Get last 6 characters of MAC
 function shortMAC(MAC) {
@@ -512,10 +520,152 @@ function createInfoElement(label, text) {
     return p;
 }
 
+// Returns a map containing system ids, timeList, and wattList
 function fetchSiteDayWatts(siteName) {
-	let wattMap = new Map();
-	const 
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        let promises = siteIDs.map(entry => {
+            const MAC = shortMAC(entry);
+            let command = Url + siteDayWatts.replace("%SITE%", MAC).replace("%DATE%", todaysDate());
+            return fetch(command)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let timeList = [];
+                    let wattList = [];
+                    data.message.forEach(entry => {
+                        // Parse the date and time string into a Date object
+                        const dateTime = new Date(entry[2]);
+                        // Format the time as "HH:MM"
+                        const formattedTime = dateTime.getHours().toString().padStart(2, '0') + ':' + 
+                                              dateTime.getMinutes().toString().padStart(2, '0');
+                        timeList.push(formattedTime);
+                        wattList.push(parseInt(entry[3], 10));
+                    });
+                    return {id: entry, timeList, wattList};
+                });
+        });
+        // Use Promise.all to wait for all promises to resolve
+        return Promise.all(promises).then(results => {
+            // Create a Map to hold the system ID and time/watt pairs
+            let dailyWattMap = new Map();
+            // Populate the Map with the ID as key and the time/watt pairs as value
+            results.forEach(result => {
+                dailyWattMap.set(result.id, { timeList: result.timeList, wattList: result.wattList });
+            });
+            //console.log(dailyWattMap)
+            return dailyWattMap; // Return the Map object
+        });
+    });
 }
+
+// Displays the daily watts line graph 
+function displayDailyWattsGraph(siteName) {
+    fetchSiteDayWatts(siteName).then(dailyWattMap => {
+        // Create the div that will hold the canvas for the site info
+        const wattLineChartDiv = document.createElement('div');
+        wattLineChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+        
+        // Create a canvas element
+        const canvas = document.createElement('canvas');
+        wattLineChartDiv.appendChild(canvas); // Append the canvas to the div
+        
+        // Get the context of the canvas
+        const ctx = canvas.getContext("2d");
+        
+        const labels = []; // Will hold all unique times across all systems
+        const datasets = []; // Will hold the data for each system
+
+        // Prepare labels and datasets
+        dailyWattMap.forEach((data, id) => {
+            // Ensure all time labels are included
+            data.timeList.forEach(time => {
+                if (!labels.includes(time)) {
+                    labels.push(time);
+                }
+            });
+
+            // Sort labels to ensure correct order on the x-axis
+            labels.sort();
+
+            // Map the wattList to the sorted labels for correct positioning
+            const dataPoints = labels.map(label => {
+                const index = data.timeList.indexOf(label);
+                return index !== -1 ? data.wattList[index] : null; // Use null for missing data points
+            });
+
+            // Create a dataset for this system
+            datasets.push({
+                label: `System ${id}`, // Customize label as needed
+                data: dataPoints,
+                fill: false,
+                borderColor: getRandomColor(), // Assign a unique color to each line
+                tension: 0.1
+            });
+        });
+
+        // Destroy any existing chart instance before creating a new one
+        if (window.wattsTimeChart instanceof Chart) {
+            window.wattsTimeChart.destroy();
+        }
+
+        // Create the line chart
+        window.wattsTimeChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+            	responsive: true,
+    			maintainAspectRatio: false,
+    			plugins: {
+					title: {
+						display: true,
+						text: 'Watt Summary for ' + todaysDate(),
+					}
+				},
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Watts'
+                        }
+                    }
+                }
+            }
+        });
+    	const chartContainer = document.getElementById('wattsTimeChartContainer');
+        if (chartContainer) {
+            chartContainer.innerHTML = ''; // Clear any existing content
+            chartContainer.appendChild(wattLineChartDiv); // Append the div (which now contains the canvas and the chart)
+        }
+    }).catch(error => {
+        console.error('Error creating line graph:', error);
+    });
+}
+
+// Helper function to generate random colors
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+
+
 
 
 
