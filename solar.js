@@ -1,24 +1,27 @@
 // Full Sites URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarNames()
 // Full AllWatts URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarWatts(*)
 // Full SiteInfo URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarInfo(%SITE%)
+// Full SolarHistory URL: http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999&Query=SolarHistory(SITE,qWattsmin1,DATE*)
 
 const Url="http://belize.expertlearningsystem.org/Knowledge/?SessionID=1234567890:9999";
 const Sites="&Query=SolarNames()";
 const AllWatts="&Query=SolarWatts(*)";
 const siteDayWatts="&Query=SolarHistory(%SITE%,qWattsmin1,%DATE%*)";
 const siteInfo="&Query=SolarInfo(%SITE%)"
+
 const allSitesDayWatts="&Query=SolarHistorySummary(*,qHistoryWattsHour1,%DATE%*)";
 const SolarWattsAverageDay="&Query=SolarWattsAverageDay(8B0C4C,%DATE%"
 const SolarWattsAllDayAllSites="&Query=SolarWattsAllDayAllSites(%DATE%*)";
-// &Query=SolarHistory(8B0AB1,qWattsmin1,2023-02-02*)
-// &Query=SolarHistory(SITE,qWattsmin1,DATE*)
 
 // Function to display all page information for any school
 function loadSiteInfo(siteName) {
 	console.log("Today's Date:",todaysDate())
+	// Display Section
 	displaySitePhotoSection(siteName);
 	displayWattGaugeSection(siteName);
 	displaySiteInfoSection(siteName);
+	// Testing
+	fetchSiteDayWatts(siteName);
 }
 
 // Get last 6 characters of MAC
@@ -317,8 +320,36 @@ function fetchYearInstalled(siteName) {
 			results.forEach(result => {
 			 	instYearMap.set(result.id, result.yearInstalled);
 			});
-			//console.log(instYearMap);
+			// console.log(instYearMap);
 			return instYearMap;
+		})
+	})
+}
+
+// Returns a map containing the limiter status for each system
+function fetchLimiterStatus(siteName) {
+	return fetchSystemIDs(siteName).then(siteIDs => {
+		let promises = siteIDs.map(ID => {
+			const MAC = shortMAC(ID);
+			let command = Url + siteInfo.replace("%SITE%", MAC);
+			return fetch(command)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					return response.json();
+				})
+				.then(data => {
+					return {id: ID, limiterStatus: data.message.limiter};
+				});
+		});
+		return Promise.all(promises).then(results => {
+			let limiterStatusMap = new Map();
+			results.forEach(result => {
+			 	limiterStatusMap.set(result.id, result.limiterStatus);
+			});
+			// console.log(limiterStatusMap);
+			return limiterStatusMap;
 		})
 	})
 }
@@ -353,7 +384,7 @@ function fetchMaxDailyWatts(siteName) {
                 maxWattsMap.set(result.id, result.maxWatts);
             });
 
-            //console.log(maxWattsMap); 
+            // console.log(maxWattsMap); 
             return maxWattsMap; // Return the Map object
         });
     });
@@ -427,7 +458,7 @@ function displaySiteInfoSection(siteName) {
 	
 	// Table headers
 	const headerRow = document.createElement('tr');
-	['System ID', 'Number of Panels', 'Current Output', 'Max Output'].forEach(headerText => {
+	['System ID', 'Number of Panels', 'Current Output', 'Max Output', 'Year Installed', 'Limiter'].forEach(headerText => {
 		const header = document.createElement('th')
 		header.textContent = headerText;
 		headerRow.appendChild(header);
@@ -438,8 +469,10 @@ function displaySiteInfoSection(siteName) {
 	Promise.all([
 		fetchNumPanels(siteName),
 		fetchSystemWatts(siteName),
-		fetchMaxDailyWatts(siteName)
-	]).then(([numPanelsMap, systemWattsMap, maxWattsMap]) => {
+		fetchMaxDailyWatts(siteName),
+		fetchYearInstalled(siteName),
+		fetchLimiterStatus(siteName)
+	]).then(([numPanelsMap, systemWattsMap, maxWattsMap, yearInstalledMap, limiterStatusMap]) => {
 		numPanelsMap.forEach((numPanels, systemId) => {
 			const row = document.createElement('tr');
 			const systemCell = document.createElement('td');
@@ -450,11 +483,17 @@ function displaySiteInfoSection(siteName) {
 			currentOutputCell.textContent = systemWattsMap.get(systemId) || 'N/A';
 			const maxOutputCell = document.createElement('td');
 			maxOutputCell.textContent = maxWattsMap.get(systemId) || 'N/A';
+			const yearInstalledCell = document.createElement('td');
+			yearInstalledCell.textContent = yearInstalledMap.get(systemId) || 'N/A';
+			const limiterStatusCell = document.createElement('td');
+			limiterStatusCell.textContent = limiterStatusMap.get(systemId) || 'N/A';
 			// Append rows
 			row.appendChild(systemCell);
 			row.appendChild(numPanelsCell);
 			row.appendChild(currentOutputCell);
 			row.appendChild(maxOutputCell);
+			row.appendChild(yearInstalledCell);
+			row.appendChild(limiterStatusCell);
 			tbody.appendChild(row);
 		});
 		siteInfoDiv.appendChild(table);
@@ -473,9 +512,10 @@ function createInfoElement(label, text) {
     return p;
 }
 
-
-
-
+function fetchSiteDayWatts(siteName) {
+	let wattMap = new Map();
+	const 
+}
 
 
 
