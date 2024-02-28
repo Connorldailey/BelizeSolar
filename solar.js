@@ -110,14 +110,14 @@ function displaySitePhotoSection(siteName) {
     container.innerHTML = '';
 
     // Create the div that will hold the school name and image
-    const siteInfoDiv = document.createElement('div');
-    siteInfoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+    const sitePhotoDiv = document.createElement('div');
+    sitePhotoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
 
     // Create and append the school name element
     const schoolNameElement = document.createElement('h3');
     schoolNameElement.textContent = siteName;
     schoolNameElement.classList.add('text-center', 'mb-3');
-    siteInfoDiv.appendChild(schoolNameElement);
+    sitePhotoDiv.appendChild(schoolNameElement);
 
     // Create and append the image element
     const imageElement = document.createElement('img');
@@ -125,10 +125,10 @@ function displaySitePhotoSection(siteName) {
     imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/' + 'schoolExample' + '.jpeg';
     imageElement.alt = 'Site Image';
     imageElement.classList.add('img-fluid', 'rounded', 'mx-auto', 'd-block'); // Make image responsive and center it
-    siteInfoDiv.appendChild(imageElement);
+    sitePhotoDiv.appendChild(imageElement);
 
-    // Append the site info div to the container
-    container.appendChild(siteInfoDiv);
+    // Append the site photo div to the container
+    container.appendChild(sitePhotoDiv);
 }
 
 // Displays the watt gauge section
@@ -330,7 +330,6 @@ function fetchMaxDailyWatts(siteName) {
         let promises = siteIDs.map(entry => {
             const MAC = shortMAC(entry);
             let command = Url + siteDayWatts.replace("%SITE%", MAC).replace("%DATE%", todaysDate());
-            console.log(command); // Log the full command for debugging
             return fetch(command)
                 .then(response => {
                     if (!response.ok) {
@@ -354,7 +353,7 @@ function fetchMaxDailyWatts(siteName) {
                 maxWattsMap.set(result.id, result.maxWatts);
             });
 
-            console.log(maxWattsMap); // Optional: log the Map
+            //console.log(maxWattsMap); 
             return maxWattsMap; // Return the Map object
         });
     });
@@ -401,18 +400,21 @@ function fetchSiteInfo(siteName) {
 }
 
 // Display site info section
-// Display site info section
 function displaySiteInfoSection(siteName) {
     const container = document.getElementById('siteInfoContainer');
     container.innerHTML = ''; // Clear existing content
+    
+    // Create the div that will hold the site info
+    const siteInfoDiv = document.createElement('div');
+    siteInfoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
 
     // Display general site information
     fetchSiteInfo(siteName).then(siteInfo => {
-        container.appendChild(createInfoElement('School Name', siteName));
-        container.appendChild(createInfoElement('Location', siteInfo.location));
-        container.appendChild(createInfoElement('Contact Name', siteInfo.contactName));
-        container.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
-        container.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
+        siteInfoDiv.appendChild(createInfoElement('School Name', siteName));
+        siteInfoDiv.appendChild(createInfoElement('Location', siteInfo.location));
+        siteInfoDiv.appendChild(createInfoElement('Contact Name', siteInfo.contactName));
+        siteInfoDiv.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
+        siteInfoDiv.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
     });
 	
 	// Prepare table for system specific info
@@ -455,11 +457,13 @@ function displaySiteInfoSection(siteName) {
 			row.appendChild(maxOutputCell);
 			tbody.appendChild(row);
 		});
-		container.appendChild(table);
+		siteInfoDiv.appendChild(table);
 	})
 	.catch(error => {
 		console.error('Error fetching system information:', error);
 	});
+	// Append the site info div to the container
+    container.appendChild(siteInfoDiv);
 }
 
 // Helper function to create info elements
