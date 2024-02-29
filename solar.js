@@ -9,10 +9,6 @@ const AllWatts="&Query=SolarWatts(*)";
 const siteDayWatts="&Query=SolarHistory(%SITE%,qWattsmin1,%DATE%*)";
 const siteInfo="&Query=SolarInfo(%SITE%)"
 
-const allSitesDayWatts="&Query=SolarHistorySummary(*,qHistoryWattsHour1,%DATE%*)";
-const SolarWattsAverageDay="&Query=SolarWattsAverageDay(8B0C4C,%DATE%"
-const SolarWattsAllDayAllSites="&Query=SolarWattsAllDayAllSites(%DATE%*)";
-
 // Function to display all page information for any school
 function loadSiteInfo(siteName) {
     console.log("Today's Date:", todaysDate());
@@ -25,10 +21,16 @@ function loadSiteInfo(siteName) {
 }
 
 function loadSiteContent(siteName) {
+	// Get todays date
+	let today = todaysDate();
+	// Display site information containers
     displaySitePhotoSection(siteName);
     displayWattGaugeSection(siteName);
     displaySiteInfoSection(siteName);
-    displayDailyWattsGraph(siteName); // Directly call this if siteName is available
+    displayDailyWattsGraph(siteName); 
+    // Testing
+	//fetchSiteDailyWattHours(siteName, "2024-02-29");
+	fetchWattHoursForMonth(siteName, today)
 }
 
 
@@ -663,6 +665,179 @@ function getRandomColor() {
     }
     return color;
 }
+
+// Returns an array containing the last 7 days (including today)
+function getlastSevenDays() {
+	let dates = [];
+	for (let i = 0; i < 7; i++) {
+		let date = new Date();
+		date.setDate(date.getDate()-i);
+		let formattedDate = date.toISOString().split('T')[0];
+		dates.push(formattedDate);
+	}
+	//console.log(dates)
+	return dates;
+}
+
+// Returns a map containing watt hours for the last 7 days (redo???????? with fetchSiteDailyWattHours)
+function fetchWeeklyWattHours(siteName) {
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        let days = getlastSevenDays();
+        let dayTotalsPromises = days.map(day => {
+            let dayPromises = siteIDs.map(MAC => {
+                const sMAC = shortMAC(MAC);
+                let command = Url + siteDayWatts.replace("%SITE%", sMAC).replace("%DATE%", day);
+                return fetch(command)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        let sortedEntries = data.message.sort((a, b) => new Date(a[2]) - new Date(b[2]));
+                        let totalWh = sortedEntries.reduce((acc, curr, index, array) => {
+                            if (index === 0) return acc;
+                            let timeDifference = (new Date(curr[2]) - new Date(array[index - 1][2])) / (1000 * 60 * 60);
+                            let watts = parseInt(curr[3], 10);
+                            return acc + (watts * timeDifference);
+                        }, 0);
+
+                        // Limit to two decimal places and convert back to number
+                        return parseFloat(totalWh.toFixed(2));
+                    });
+            });
+
+            return Promise.all(dayPromises).then(systemTotals => {
+                let dayTotalWh = systemTotals.reduce((sum, current) => sum + current, 0);
+                // Limit to two decimal places and convert back to number
+                return { day, dayTotalWh: parseFloat(dayTotalWh.toFixed(2)) };
+            });
+        });
+
+        return Promise.all(dayTotalsPromises).then(dayTotals => {
+            let weekHistory = new Map();
+            dayTotals.forEach(({ day, dayTotalWh }) => weekHistory.set(day, dayTotalWh));
+            //console.log(weekHistory)
+            return weekHistory;
+        });
+    });
+}
+
+// Returns an array containing the last twelve months in yyyy-mm format
+function getlastTwelveMonths() {
+    let months = [];
+    for (let i = 11; i >= 0; i--) {
+        let date = new Date();
+        date.setMonth(date.getMonth() - i);
+        let year = date.getFullYear();
+        let month = (date.getMonth() + 1).toString().padStart(2, '0'); // +1 because getMonth() is 0-indexed
+        months.push(`${year}-${month}`);
+    }
+    return months;
+}
+
+// Returns an array containing the days of the given month
+function getDaysOfMonth(yearMonth) {
+    let daysOfMonth = [];
+
+    // Separate year and month
+    const [year, month] = yearMonth.split('-').map(part => parseInt(part, 10));
+
+    // Create a date object pointing to the first day of the given month
+    let date = new Date(year, month - 1, 1);
+
+    // Loop until the month changes
+    while (date.getMonth() === month - 1) {
+        // Format the date in "YYYY-MM-DD" format
+        const formattedDate = date.toISOString().split('T')[0];
+        daysOfMonth.push(formattedDate);
+
+        // Move to the next day
+        date.setDate(date.getDate() + 1);
+    }
+
+    //console.log(daysOfMonth);
+    return daysOfMonth;
+}
+
+// Returns the watt hours for a system on the given date
+function fetchSystemDailyWattHours(shortMAC, date) {
+    let command = Url + siteDayWatts.replace("%SITE%", shortMAC).replace("%DATE%", date);
+    return fetch(command)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let totalEnergy = 0; // Total energy in watt-hours
+
+            if (data.message.length > 1) {
+                for (let i = 0; i < data.message.length - 1; i++) {
+                    const currentEntry = data.message[i];
+                    const nextEntry = data.message[i + 1];
+
+                    // Convert timestamps to Date objects
+                    const currentTime = new Date(currentEntry[2]);
+                    const nextTime = new Date(nextEntry[2]);
+
+                    // Calculate time difference in hours
+                    const timeDiffHours = (nextTime - currentTime) / (1000 * 60 * 60);
+
+                    // Calculate energy for the interval using the average of the two readings (if assuming linear consumption)
+                    // Or use just the current reading if assuming instantaneous consumption represented
+                    const watts = parseInt(currentEntry[3], 10);
+                    const energyForInterval = watts * timeDiffHours;
+
+                    totalEnergy += energyForInterval;
+                }
+            }
+
+            // Round to two decimal places
+            totalEnergy = parseFloat(totalEnergy.toFixed(2));
+            //console.log("Total Energy (Wh):", totalEnergy);
+            return totalEnergy;
+        });
+}
+
+// Returns the total watt site watt hours for a given day (sum of system watt hours)
+function fetchSiteDailyWattHours(siteName, date) {
+    return fetchSystemIDs(siteName).then(siteIDs => {
+        let promises = siteIDs.map(ID => {
+            let MAC = shortMAC(ID);
+            return fetchSystemDailyWattHours(MAC, date);
+        });
+
+        return Promise.all(promises).then(entries => {
+            let siteWattHours = entries.reduce((acc, entry) => acc + parseFloat(entry), 0);
+            siteWattHours = parseFloat(siteWattHours.toFixed(2)); // Ensure final value has two decimal places
+            //console.log("Total Watt Hours for Site on " + date + ": ", siteWattHours);
+            return siteWattHours;
+        });
+    });
+}
+
+// Returns the total watt hours for the given month
+function fetchWattHoursForMonth(siteName, date) {
+    let yearMonth = date.slice(0, 7); // More concise way to extract yearMonth
+    let promises = getDaysOfMonth(yearMonth).map(day => {
+        return fetchSiteDailyWattHours(siteName, day)
+            .catch(() => 0); // In case of an error, assume 0 watt hours for that day
+    });
+    
+    return Promise.all(promises).then(entries => {
+        let monthlyWattHours = entries.reduce((acc, item) => acc + parseInt(item, 10), 0);
+        console.log("Month: ", yearMonth, "Watt Hours: ", monthlyWattHours);
+        return monthlyWattHours;
+    });
+}
+
+function fetchWattHoursForYear() {
+
+}
+
 
 
 
