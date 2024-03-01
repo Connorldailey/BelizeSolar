@@ -28,9 +28,6 @@ function loadSiteContent(siteName) {
     displayWattGaugeSection(siteName);
     displaySiteInfoSection(siteName);
     displayDailyWattsGraph(siteName); 
-    // Testing
-	//fetchSiteDailyWattHours(siteName, "2024-02-29");
-	fetchWattHoursForMonth(siteName, today)
 }
 
 
@@ -667,7 +664,7 @@ function getRandomColor() {
 }
 
 // Returns an array containing the last 7 days (including today)
-function getlastSevenDays() {
+function getLastSevenDays() {
 	let dates = [];
 	for (let i = 0; i < 7; i++) {
 		let date = new Date();
@@ -679,53 +676,23 @@ function getlastSevenDays() {
 	return dates;
 }
 
-// Returns a map containing watt hours for the last 7 days (redo???????? with fetchSiteDailyWattHours)
-function fetchWeeklyWattHours(siteName) {
-    return fetchSystemIDs(siteName).then(siteIDs => {
-        let days = getlastSevenDays();
-        let dayTotalsPromises = days.map(day => {
-            let dayPromises = siteIDs.map(MAC => {
-                const sMAC = shortMAC(MAC);
-                let command = Url + siteDayWatts.replace("%SITE%", sMAC).replace("%DATE%", day);
-                return fetch(command)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        let sortedEntries = data.message.sort((a, b) => new Date(a[2]) - new Date(b[2]));
-                        let totalWh = sortedEntries.reduce((acc, curr, index, array) => {
-                            if (index === 0) return acc;
-                            let timeDifference = (new Date(curr[2]) - new Date(array[index - 1][2])) / (1000 * 60 * 60);
-                            let watts = parseInt(curr[3], 10);
-                            return acc + (watts * timeDifference);
-                        }, 0);
+// Returns a map containing watt hours for the last 7 days 
+function fetchWattHoursForWeek(siteName) {
+    let days = getLastSevenDays(); // Assuming this function returns an array of date strings for the last 7 days.
+    let dayTotalsPromises = days.map(day => fetchSiteDailyWattHours(siteName, day)
+        .catch(() => 0) // Consider how to handle errors; here, we assume 0 watt-hours for error days.
+    );
 
-                        // Limit to two decimal places and convert back to number
-                        return parseFloat(totalWh.toFixed(2));
-                    });
-            });
-
-            return Promise.all(dayPromises).then(systemTotals => {
-                let dayTotalWh = systemTotals.reduce((sum, current) => sum + current, 0);
-                // Limit to two decimal places and convert back to number
-                return { day, dayTotalWh: parseFloat(dayTotalWh.toFixed(2)) };
-            });
-        });
-
-        return Promise.all(dayTotalsPromises).then(dayTotals => {
-            let weekHistory = new Map();
-            dayTotals.forEach(({ day, dayTotalWh }) => weekHistory.set(day, dayTotalWh));
-            //console.log(weekHistory)
-            return weekHistory;
-        });
+    return Promise.all(dayTotalsPromises).then(dayTotals => {
+        // Construct a map of day to total watt-hours
+        let weekHistory = new Map(days.map((day, index) => [day, dayTotals[index]]));
+        //console.log(weekHistory);
+        return weekHistory;
     });
 }
 
 // Returns an array containing the last twelve months in yyyy-mm format
-function getlastTwelveMonths() {
+function getLastTwelveMonths() {
     let months = [];
     for (let i = 11; i >= 0; i--) {
         let date = new Date();
@@ -820,25 +787,163 @@ function fetchSiteDailyWattHours(siteName, date) {
 }
 
 // Returns the total watt hours for the given month
-function fetchWattHoursForMonth(siteName, date) {
-    let yearMonth = date.slice(0, 7); // More concise way to extract yearMonth
+function fetchWattHoursForMonth(siteName, yearMonth) {
     let promises = getDaysOfMonth(yearMonth).map(day => {
         return fetchSiteDailyWattHours(siteName, day)
-            .catch(() => 0); // In case of an error, assume 0 watt hours for that day
+            .catch(() => 0); // Handles errors by assuming 0 watt hours for that day, ensuring the rest of the days are still processed.
     });
     
     return Promise.all(promises).then(entries => {
-        let monthlyWattHours = entries.reduce((acc, item) => acc + parseInt(item, 10), 0);
-        console.log("Month: ", yearMonth, "Watt Hours: ", monthlyWattHours);
-        return monthlyWattHours;
+        let monthlyWattHours = entries.reduce((acc, item) => acc + item, 0); // Removed unnecessary parseInt, assuming fetchSiteDailyWattHours returns a number.
+        //console.log("Month: ", yearMonth, "Watt Hours: ", monthlyWattHours.toFixed(2));
+        return parseFloat(monthlyWattHours.toFixed(2)); // Ensuring rounding here.
     });
 }
 
-function fetchWattHoursForYear() {
-
+// Returns a map containing the total watt hours for each month in the last year
+function fetchWattHoursForYear(siteName) {
+    let months = getLastTwelveMonths();
+    
+    let promises = months.map(month => fetchWattHoursForMonth(siteName, month));
+    
+    return Promise.all(promises).then(monthlyWattHours => {
+        // Constructing a Map directly from month and watt hours array.
+        let monthlyWattHoursMap = new Map(months.map((month, i) => [month, monthlyWattHours[i]]));
+        console.log(monthlyWattHoursMap); // For debugging
+        return monthlyWattHoursMap;
+    });
 }
 
+// Displays the weekly watt hour summary bar graph (by day)
+function displayWattHourWeekSummaryGraph(siteName) {
+	fetchWattHoursForWeek(siteName).then(weeklyWattMap => {
+		 
+        const labels = Array.from(weeklyWattMap.keys()); // Days of the week;
+		const dataPoints = Array.from(weeklyWattMap.values()); // Watt hours for each day
+        
+		// Create the div that will hold the canvas for the site info
+		const wattHourDiv = document.createElement('div')
+		wattHourDiv.classList.add('p-3','border','rounded','bg-light','mt-3');
+		
+		// Clear the previous graph
+        const graphContainer = document.getElementById('graphContainer1');
+        graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
+		
+		// Create a canvas for the chart
+        const canvas = document.createElement('canvas');
+        graphContainer.appendChild(canvas);
+		
+		// Get the context of the canvas
+		const ctx = canvas.getContext('2d');
+		
+		// Create the bar graph
+		new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels, // Days of the week
+                datasets: [{
+                    label: 'Watt Hours',
+                    data: dataPoints, // Watt hours for each day
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+            	responsive: true,
+            	//maintainAspectRatio: false,
+            	plugins: {
+            		title: {
+            			display: true,
+            			text: 'Watt Hour Summary for Last Week',
+            		}
+            	},
+                scales: {
+                	x: {
+                		title: {
+                			display: true,
+                			text: 'Day',
+                		}
+                	},
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Watt Hours'
+                        }
+                    }
+                }
+            }
+        });
+	}).catch(error => {
+        console.error('Error displaying watt hour week summary graph:', error);
+    });
+}
 
+// Displays the yearly watt hour summary bar graph (by month)
+function displayWattHourYearSummaryGraph(siteName) {
+    // Assume fetchWattHoursForYear returns a map with months as keys and watt hours as values
+    fetchWattHoursForYear(siteName).then(yearlyWattMap => {
+        // Prepare the labels and dataPoints arrays from the map
+        const labels = Array.from(yearlyWattMap.keys()); // Months
+        const dataPoints = Array.from(yearlyWattMap.values()); // Watt hours for each month
+        
+        // Clear the previous graph
+        const graphContainer = document.getElementById('graphContainer2');
+        graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
+
+        // Create a canvas for the chart
+        const canvas = document.createElement('canvas');
+        graphContainer.appendChild(canvas);
+
+        // Generate the chart
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'bar', // Or 'line' if you prefer
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Monthly Watt Hours',
+                    data: dataPoints,
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Watt Hours'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Yearly Watt Hour Summary'
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }).catch(error => {
+        console.error('Error displaying watt hour year summary graph:', error);
+    });
+}
 
 
 
