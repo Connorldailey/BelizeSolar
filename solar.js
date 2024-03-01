@@ -21,13 +21,19 @@ function loadSiteInfo(siteName) {
 }
 
 function loadSiteContent(siteName) {
-	// Get todays date
-	let today = todaysDate();
 	// Display site information containers
     displaySitePhotoSection(siteName);
     displayWattGaugeSection(siteName);
     displaySiteInfoSection(siteName);
-    displayDailyWattsGraph(siteName); 
+    displayDailyWattsGraph(siteName);
+    displayWattHourSummarySection(siteName);
+
+    // Make the siteContentContainer visible
+    const siteContentContainer = document.getElementById('siteContentContainer');
+    if (siteContentContainer.classList.contains('hidden')) {
+        siteContentContainer.classList.remove('hidden');
+        siteContentContainer.classList.add('visible');
+    }
 }
 
 
@@ -816,28 +822,23 @@ function fetchWattHoursForYear(siteName) {
 
 // Displays the weekly watt hour summary bar graph (by day)
 function displayWattHourWeekSummaryGraph(siteName) {
-	fetchWattHoursForWeek(siteName).then(weeklyWattMap => {
-		 
-        const labels = Array.from(weeklyWattMap.keys()); // Days of the week;
-		const dataPoints = Array.from(weeklyWattMap.values()); // Watt hours for each day
-        
-		// Create the div that will hold the canvas for the site info
-		const wattHourDiv = document.createElement('div')
-		wattHourDiv.classList.add('p-3','border','rounded','bg-light','mt-3');
-		
-		// Clear the previous graph
-        const graphContainer = document.getElementById('graphContainer1');
+    fetchWattHoursForWeek(siteName).then(weeklyWattMap => {
+        const labels = Array.from(weeklyWattMap.keys()); // Days of the week
+        const dataPoints = Array.from(weeklyWattMap.values()); // Watt hours for each day
+
+        // Target the chartContainer directly, ensuring it's part of the initial setup
+        const graphContainer = document.getElementById('chartContainer');
         graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
-		
-		// Create a canvas for the chart
+
+        // Create a canvas for the chart
         const canvas = document.createElement('canvas');
         graphContainer.appendChild(canvas);
-		
-		// Get the context of the canvas
-		const ctx = canvas.getContext('2d');
-		
-		// Create the bar graph
-		new Chart(ctx, {
+
+        // Get the context of the canvas
+        const ctx = canvas.getContext('2d');
+
+        // Create the bar graph
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels, // Days of the week
@@ -850,21 +851,20 @@ function displayWattHourWeekSummaryGraph(siteName) {
                 }]
             },
             options: {
-            	responsive: true,
-            	//maintainAspectRatio: false,
-            	plugins: {
-            		title: {
-            			display: true,
-            			text: 'Watt Hour Summary for Last Week',
-            		}
-            	},
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Watt Hour Summary for Last Week',
+                    }
+                },
                 scales: {
-                	x: {
-                		title: {
-                			display: true,
-                			text: 'Day',
-                		}
-                	},
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Day',
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         title: {
@@ -875,75 +875,128 @@ function displayWattHourWeekSummaryGraph(siteName) {
                 }
             }
         });
-	}).catch(error => {
+    }).catch(error => {
         console.error('Error displaying watt hour week summary graph:', error);
     });
 }
 
 // Displays the yearly watt hour summary bar graph (by month)
 function displayWattHourYearSummaryGraph(siteName) {
-    // Assume fetchWattHoursForYear returns a map with months as keys and watt hours as values
     fetchWattHoursForYear(siteName).then(yearlyWattMap => {
         // Prepare the labels and dataPoints arrays from the map
         const labels = Array.from(yearlyWattMap.keys()); // Months
         const dataPoints = Array.from(yearlyWattMap.values()); // Watt hours for each month
-        
-        // Clear the previous graph
-        const graphContainer = document.getElementById('graphContainer2');
-        graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
 
-        // Create a canvas for the chart
-        const canvas = document.createElement('canvas');
-        graphContainer.appendChild(canvas);
+        // Ensure the graphContainer is correctly targeted and exists in your HTML
+        const graphContainer = document.getElementById('chartContainer');
+        if (graphContainer) {
+            graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
 
-        // Generate the chart
-        const ctx = canvas.getContext('2d');
-        new Chart(ctx, {
-            type: 'bar', // Or 'line' if you prefer
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Monthly Watt Hours',
-                    data: dataPoints,
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Watt Hours'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Month'
-                        }
-                    }
+            // Create a canvas for the chart and append it to the graphContainer
+            const canvas = document.createElement('canvas');
+            graphContainer.appendChild(canvas);
+
+            // Get the context of the canvas to draw the chart
+            const ctx = canvas.getContext('2d');
+
+            // Instantiate the Chart.js chart
+            new Chart(ctx, {
+                type: 'bar', // Choose 'bar' for bar graph, can be changed to 'line' for a line graph
+                data: {
+                    labels: labels, // X-axis labels (months)
+                    datasets: [{
+                        label: 'Watt Hours',
+                        data: dataPoints, // Y-axis data points (watt hours for each month)
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
                 },
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Yearly Watt Hour Summary'
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Watt Hours'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        }
                     },
-                    legend: {
-                        display: true,
-                        position: 'top'
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Yearly Watt Hour Summary'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }).catch(error => {
         console.error('Error displaying watt hour year summary graph:', error);
     });
 }
+
+// Sets up graph container with buttons and displays the weekly watt hour chart by default
+function displayWattHourSummarySection(siteName) {
+    // id="graphSection" in HTML where this container will be appended
+    const root = document.getElementById('graphSection');
+    root.innerHTML = ''; // Clear existing content
+
+    // Create a container to store all data
+    const wattHourChartDiv = document.createElement('div');
+    wattHourChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3'); // Added mb-3 for some margin at the bottom
+
+    // Create a div for buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('d-flex', 'justify-content-between', 'mb-4'); // Flexbox for layout, mb-4 for margin bottom
+
+    // Create buttons for week and year summaries
+    const weekButton = document.createElement('button');
+    weekButton.innerText = 'Week Summary';
+    weekButton.classList.add('btn', 'btn-primary'); // Assuming Bootstrap for styling
+    weekButton.onclick = () => displayWattHourWeekSummaryGraph(siteName);
+
+    const yearButton = document.createElement('button');
+    yearButton.innerText = 'Year Summary';
+    yearButton.classList.add('btn', 'btn-secondary'); // Assuming Bootstrap for styling
+    yearButton.onclick = () => displayWattHourYearSummaryGraph(siteName);
+
+    // Append buttons to the buttonContainer
+    buttonContainer.appendChild(weekButton);
+    buttonContainer.appendChild(yearButton);
+
+    // Append the buttonContainer to the wattHourChartDiv
+    wattHourChartDiv.appendChild(buttonContainer);
+
+    // Create another div for the chart
+    const chartBoxContainer = document.createElement('div');
+    chartBoxContainer.id = 'chartContainer'; // This will be targeted by the chart display functions
+    chartBoxContainer.classList.add('border', 'rounded', 'bg-white', 'p-3', 'd-flex', 'justify-content-center', 'align-items-center'); // Flexbox for centering
+    chartBoxContainer.style.height = '400px'; // Set a height for the chart container
+
+    // Append the chartBoxContainer to the wattHourChartDiv
+    wattHourChartDiv.appendChild(chartBoxContainer);
+
+    // Append the entire wattHourChartDiv to the root
+    root.appendChild(wattHourChartDiv);
+
+    // Display the weekly watt hour chart by default
+    displayWattHourWeekSummaryGraph(siteName);
+}
+
+
 
 
 

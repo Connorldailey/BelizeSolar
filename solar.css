@@ -1,0 +1,51 @@
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: flex; /* or 'block' depending on the layout you want when visible */
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 0 auto;
+    max-width: 1400px; /* Adjust based on the layout's maximum width */
+}
+
+.top-row, .bottom-row {
+    display: flex;
+    gap: 20px;
+}
+
+.top-row .flex-item, .bottom-row .flex-item {
+    flex: 1;
+    /* Ensure equal width distribution */
+    min-height: 200px; /* Adjust based on your preferred height */
+    border: 1px solid #ccc; /* For visualization */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Optional: If you want the top and bottom rows to have different heights */
+.top-row .flex-item {
+    min-height: 300px; /* Height for top row items */
+}
+
+.bottom-row .flex-item {
+    min-height: 400px; /* Height for bottom row items */
+}
+
+@media (max-width: 1024px) {
+    .top-row, .bottom-row {
+        flex-direction: column;
+    }
+    .top-row .flex-item, .bottom-row .flex-item {
+        /* Ensure each item takes full width on smaller screens */
+        flex: 0 0 100%;
+    }
+}
+
+
+
