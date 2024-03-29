@@ -1,51 +1,37 @@
-.hidden {
-    display: none;
+.grid-container {
+    display: grid;
+    height: 100vh; /* Make the grid container half the height of the viewport */
+    grid-template-columns: repeat(4, 1fr); /* Divide into 4 equal columns */
+    grid-template-rows: 1fr 1fr; /* Two rows, each half the height */
 }
 
-.visible {
-    display: flex; /* or 'block' depending on the layout you want when visible */
-}
-
-.flex-container {
+.sitePhotoContainer {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin: 0 auto;
-    max-width: 1400px; /* Adjust based on the layout's maximum width */
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black; /* Just for visualization */
 }
 
-.top-row, .bottom-row {
-    display: flex;
-    gap: 20px;
+.photo, .gauge {
+    grid-column: span 1; /* Each takes up 1 fraction of the space */
 }
 
-.top-row .flex-item, .bottom-row .flex-item {
-    flex: 1;
-    /* Ensure equal width distribution */
-    min-height: 200px; /* Adjust based on your preferred height */
-    border: 1px solid #ccc; /* For visualization */
-    padding: 10px;
-    box-sizing: border-box;
+.info {
+    grid-column: span 2; /* Takes up 2 fractions of the space, filling the right half */
 }
 
-/* Optional: If you want the top and bottom rows to have different heights */
-.top-row .flex-item {
-    min-height: 300px; /* Height for top row items */
+.line, .bar {
+    grid-column: span 2; /* Each takes up half the width of the screen */
 }
 
-.bottom-row .flex-item {
-    min-height: 400px; /* Height for bottom row items */
+.chart-container {
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
 }
 
-@media (max-width: 1024px) {
-    .top-row, .bottom-row {
-        flex-direction: column;
-    }
-    .top-row .flex-item, .bottom-row .flex-item {
-        /* Ensure each item takes full width on smaller screens */
-        flex: 0 0 100%;
-    }
+.date-picker-container {
+    margin-bottom: 20px; /* Adjust as needed */
 }
-
-
-

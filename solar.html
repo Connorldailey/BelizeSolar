@@ -9,7 +9,7 @@
 		<title> Belize Solar Project</title>
 		<link rel="icon" type="image/x-icon" href="/Images/sunFavicon.png">
 		<meta name="author" content="Connor Dailey">
-		<meta name="description" content="Describe what this website is about">
+		<meta name="description" content="Explore solar energy across various schools in Belize">
 		<link rel="stylesheet" href="./solar.css">
 		<!--- Bootstrap 5 CSS -->
 			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -29,10 +29,10 @@
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 						<li class="nav-item">
-							<a class="nav-link active" aria-current="page" href="solar.html">Home</a>
+							<a class="nav-link" data-target="homeContent" href="#">Home</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="#"> Solar Overview</a>
+							<a class="nav-link" data-target="solarOverviewContent" href="#">Solar Overview</a>
 						</li>
 						
 						<!-- Schools Dropdown Menu -->
@@ -46,13 +46,10 @@
 						</li>
 
 						<li class="nav-item">
-							<a class="nav-link" href="#">Interactive Map</a>
+							<a class="nav-link" data-target="interactiveMapContent" href="#">Interactive Map</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="#">Learn More</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">Get Involved</a>
+							<a class="nav-link" data-target="learnMoreContent" href="#">Learn More</a>
 						</li>
 					</ul>
 					<form class="d-flex">
@@ -62,25 +59,66 @@
 				</div>
 			</div>
 		</nav>
-
+		
+		<!-- Jumbotron to display content for any page-->
 		<div class="jumbotron">
-			<div id="siteContentContainer" class="flex-container">
-				<div class="top-row">
-					<div id="sitePhotoContainer" class="flex-item"></div>
-					<div id="wattGaugeContainer" class="flex-item"></div>
-					<div id="siteInfoContainer" class="flex-item"></div>
+
+			<!-- Home Content -->
+			<div id="homeContent" class="content-section">
+				<h1>Welcome to the Belize Solar Project</h1>
+				<p>Explore solar energy across various schools in Belize.</p>
+				<!-- More homepage content goes here -->
+			</div>
+	
+			<!-- Solar Overview Content (initially hidden) -->
+			<div id="solarOverviewContent" class="content-section hidden">
+				<h2>Solar Overview</h2>
+				<p>Information about solar energy and its impact in Belize.</p>
+				<!-- Live watts bar graph -->
+				<div id="liveWattsChartContainer"></div>
+				<!-- Container for the date picker and the watt hours chart -->
+				<div id="wattHoursOverviewContainer" class="chart-container">
+					<div id="datePickerContainer" class="date-picker-container">
+						<input type="date" id="wattHoursDate" name="wattHoursDate">
+					</div>
+					<div id="wattHoursChartContainer"></div>
 				</div>
-				<div class="bottom-row">
-					<div id="wattsTimeChartContainer" class="flex-item"></div>
-					<div id="graphSection" class="flex-item"></div>
+			</div>
+	
+			<!-- Interactive Map Content (initially hidden) -->
+			<div id="interactiveMapContent" class="content-section hidden">
+				<h2>Interactive Map</h2>
+				<p>Interactive map showing the location of schools and solar installations.</p>
+				<!-- Interactive map goes here -->
+			</div>
+
+			<!-- Learn More Content (initially hidden) -->
+			<div id="learnMoreContent" class="content-section hidden">
+				<h2>Learn More</h2>
+				<p>Resources and information for deeper understanding of solar energy.</p>
+				<!-- Additional resources and information goes here -->
+			</div>
+
+			<!-- School Content (initially hidden) -->
+			<div id="siteContentContainer" class="content-section hidden">
+				<!-- School-specific content goes here -->
+				<div class="grid-container">
+					<!-- Top Grid -->
+					<div id="sitePhotoContainer" class="item photo"></div>
+					<div id="wattGaugeContainer" class="item gauge"></div>
+					<div id="siteInfoContainer" class="item info"></div>
+					<!-- Bottom Grid -->
+					<div id="wattsTimeChartContainer" class="item line"></div>
+					<div id="graphSection" class="item bar"></div>
 				</div>
 			</div>
 
 		</div>
+
 		
 		<!-- Footer -->
 		<footer>
-        	<p>&copy; Kenyon CS 2023</p>
+        	<p>&copy; Kenyon CS</p>
       	</footer>
       	
 		<!-- Bootstrap 5 JavaScript Bundle with Popper -->

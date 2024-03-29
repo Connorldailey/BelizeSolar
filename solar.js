@@ -9,33 +9,106 @@ const AllWatts="&Query=SolarWatts(*)";
 const siteDayWatts="&Query=SolarHistory(%SITE%,qWattsmin1,%DATE%*)";
 const siteInfo="&Query=SolarInfo(%SITE%)"
 
-// Function to display all page information for any school
-function loadSiteInfo(siteName) {
-    console.log("Today's Date:", todaysDate());
-    // Ensure DOM is fully loaded before attempting to display info
-    if (document.readyState === 'loading') {  // Loading hasn't finished yet
-        document.addEventListener('DOMContentLoaded', () => loadSiteContent(siteName));
-    } else {  // `DOMContentLoaded` has already fired
-        loadSiteContent(siteName);
-    }
-}
+// Function to display all page information for a selected school
+const loadSiteInfo = (siteName) => {
+    console.log(`Loading site info for: ${siteName}`);
+    // Hide all content sections to ensure a clean slate
+    hideAllContentSections();
+    // Clear any previously loaded school content
+    clearSchoolContent();
+    // Load new school content
+    loadSiteContent(siteName);
+};
 
-function loadSiteContent(siteName) {
-	// Display site information containers
+// Clears content from all school-specific sections
+const clearSchoolContent = () => {
+    // List of all container IDs to clear
+    ['sitePhotoContainer', 'wattGaugeContainer', 'siteInfoContainer', 'wattsTimeChartContainer', 'graphSection']
+        .forEach(id => document.getElementById(id).innerHTML = ''); // Clear content
+};
+
+// Loads content for the selected school
+const loadSiteContent = (siteName) => {
+    // Populate respective containers with new content based on the selected site
     displaySitePhotoSection(siteName);
     displayWattGaugeSection(siteName);
     displaySiteInfoSection(siteName);
     displayDailyWattsGraph(siteName);
     displayWattHourSummarySection(siteName);
 
-    // Make the siteContentContainer visible
-    const siteContentContainer = document.getElementById('siteContentContainer');
-    if (siteContentContainer.classList.contains('hidden')) {
-        siteContentContainer.classList.remove('hidden');
-        siteContentContainer.classList.add('visible');
-    }
-}
+    // Make the site content container visible after loading new content
+    document.getElementById('siteContentContainer').style.display = 'block';
+};
 
+// Hides all content sections
+const hideAllContentSections = () => {
+    // Iterate through all elements with class 'content-section' and hide them
+    document.querySelectorAll('.content-section').forEach(section => section.style.display = 'none');
+};
+
+// Function to show a content section and perform any initializations
+const showContentSectionById = (sectionId) => {
+    // Hide all sections before showing the targeted one to ensure only one section is visible at a time
+    hideAllContentSections();
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = 'block'; // Show the section if found
+
+        // Perform specific initializations based on the sectionId
+        switch (sectionId) {
+            case 'solarOverviewContent':
+                // Fetch and display the live watts bar graph
+                displayLiveWattsBarGraph();
+                // Initialize the date picker for the solar overview section
+                initializeDatePicker();
+                break;
+            // Add more cases for other sections if necessary
+        }
+    } else {
+        console.error(`No section found with ID: ${sectionId}. Check if the ID is correct.`);
+    }
+};
+
+// Attach event listeners to navigation links
+document.querySelectorAll('nav .nav-link').forEach(link => {
+    link.addEventListener('click', (event) => {
+    	// Retrieve the 'data-target' attribute to identify the target section
+        const targetId = link.getAttribute('data-target');
+        if (targetId) {
+            event.preventDefault(); // Prevent default link behavior
+            showContentSectionById(targetId); // Show the targeted content section
+            
+            // Update navigation link active status
+            document.querySelectorAll('nav .nav-link').forEach(navLink => navLink.classList.remove('active'));
+            link.classList.add('active');
+        }
+    });
+});
+
+// Initialize the website content once the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    populateDropdown(); // Populate the schools dropdown menu
+    showContentSectionById('homeContent'); // Show the home content by default
+});
+
+// Initialize the date picker and attach the event listener to it
+const initializeDatePicker = () => {
+    const datePicker = document.getElementById('wattHoursDate');
+    if (datePicker) {
+        datePicker.valueAsDate = new Date(); // Set to today's date as default
+
+        // Attach the change event listener to the date picker
+        datePicker.addEventListener('change', () => {
+            const selectedDate = datePicker.value;
+            updateWattHoursChart(selectedDate);
+        });
+
+        // Call updateWattHoursChart for the first time to initialize the chart with the current date
+        updateWattHoursChart(datePicker.value);
+    } else {
+        console.error('Date picker element with id "wattHoursDate" not found.');
+    }
+};
 
 // Get last 6 characters of MAC
 function shortMAC(MAC) {
@@ -137,8 +210,9 @@ function displaySitePhotoSection(siteName) {
 
     // Create and append the image element
     const imageElement = document.createElement('img');
-    // Use a stock image for now. Replace the 'src' attribute with your image path or URL
-    imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/' + 'schoolExample' + '.jpeg';
+    // Replace the 'src' attribute with image path 
+    let site = siteName.split(" ").join(""); // Remove spaces from site name
+    imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/' + site + '.jpeg';
     imageElement.alt = 'Site Image';
     imageElement.classList.add('img-fluid', 'rounded', 'mx-auto', 'd-block'); // Make image responsive and center it
     sitePhotoDiv.appendChild(imageElement);
@@ -995,6 +1069,238 @@ function displayWattHourSummarySection(siteName) {
     // Display the weekly watt hour chart by default
     displayWattHourWeekSummaryGraph(siteName);
 }
+
+// Returns a map containing live watts for each site
+function getLiveWattsBySchool() {
+	let liveWatts = new Map();
+	return processSites().then(processedSites => {
+		let promises = processedSites.map(site => {
+			return fetchTotalWatts(site).then(watts => {
+				liveWatts.set(site, watts);
+			});
+		});
+		return Promise.all(promises).then(() => {
+			//console.log(liveWatts);
+			return liveWatts;
+		});
+	});
+}
+
+// Displays a bar graph of live watts for each school on the solar overview page
+const displayLiveWattsBarGraph = () => {
+    getLiveWattsBySchool().then(liveWatts => {
+        // Ensure the graphContainer is correctly targeted and exists
+        const graphContainer = document.getElementById('liveWattsChartContainer');
+        if (graphContainer) {
+            graphContainer.innerHTML = ''; // Clear the container
+
+            // Create a container for the chart
+            const chartDiv = document.createElement('div');
+            chartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+            chartDiv.style.maxWidth = '1000px'; // Set a max width for the chart container
+			chartDiv.style.margin = 'auto'; // Center the container
+
+            graphContainer.appendChild(chartDiv);
+
+            // Create a canvas and append to chartDiv
+            const canvas = document.createElement('canvas');
+            chartDiv.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            // Prepare labels and dataPoints
+            const labels = Array.from(liveWatts.keys());
+            const dataPoints = labels.map(label => liveWatts.get(label) || 0); // Use 0 if no watts data
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels, // Site names
+                    datasets: [{
+                        label: 'Live Watts',
+                        data: dataPoints, // Watts data or 0
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Watts'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'School'
+                            }
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Live Watts Summary'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+    }).catch(error => {
+        console.error('Error displaying live watts bar graph:', error);
+    });
+};
+
+// Returns a map containing system IDs packaged by school 
+function getIDsBySchool() {
+	let IDMap = new Map();
+	return processSites().then(processedSites => {
+		let promises = processedSites.map(site => {
+			return fetchSystemIDs(site).then(ID => {
+				IDMap.set(site, ID);
+			});
+		});
+		return Promise.all(promises).then(() => {
+			//console.log(IDMap);
+			return IDMap;
+		});
+	});
+}
+
+function getTotalWattHoursForDate(date) {
+    return processSites().then(schools => {
+        let promises = schools.map(school => {
+            return fetchSiteDailyWattHours(school, date)
+                .then(wattHours => {
+                    return wattHours;
+                })
+                .catch(error => {
+                    return 0; // If there's an error, return 0 for that school
+                });
+        });
+
+        return Promise.all(promises).then(results => {
+            let wattHoursBySchool = new Map(schools.map((school, index) => [school, results[index]]));
+            //console.log('Watt hours by school:', wattHoursBySchool);
+            return wattHoursBySchool;
+        });
+    });
+}
+
+// Fetch data and update the chart
+function updateWattHoursChart(date) {
+    getTotalWattHoursForDate(date).then(wattHoursBySchool => {
+        displayWattHoursBarChart(wattHoursBySchool);
+    });
+}
+
+// Function to display the watt hour bar chart for all sites in a container
+function displayWattHoursBarChart(data) {
+    // Find or create the container element
+    let container = document.getElementById('wattHoursChartContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'wattHoursChartContainer';
+        container.classList.add('chart-container'); // Add any styling classes necessary
+        container.style.padding = '20px'; // Example styling
+        container.style.border = '1px solid #ccc'; // Example styling
+        container.style.borderRadius = '5px'; // Example styling
+        container.style.backgroundColor = '#fff'; // Example styling
+        container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; // Example styling
+        container.style.marginTop = '20px'; // Example styling
+        container.style.maxWidth = '1000px'; // Example styling
+        container.style.margin = 'auto'; // Center the container
+
+        // Append the container to the desired parent element
+        const solarOverviewContent = document.getElementById('solarOverviewContent');
+        if(solarOverviewContent) {
+            solarOverviewContent.appendChild(container);
+        } else {
+            console.error('Solar overview content element not found.');
+            return;
+        }
+    }
+    // Clear any existing content in the container
+    container.innerHTML = '';
+
+    // Create a canvas element
+    const canvas = document.createElement('canvas');
+    canvas.id = 'wattHoursBarChart';
+    container.appendChild(canvas); // Append the canvas to the container
+
+    // Get the context of the canvas
+    const ctx = canvas.getContext('2d');
+    // Destroy the previous chart instance if it exists
+    if (window.wattHoursBarChartInstance) {
+        window.wattHoursBarChartInstance.destroy();
+    }
+
+    // Create a new chart instance
+    window.wattHoursBarChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Array.from(data.keys()),
+            datasets: [{
+                label: 'Total Watt Hours',
+                data: Array.from(data.values()),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Watt Hours'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'School'
+                    },
+                    ticks: {
+                        autoSkip: false, // Do not skip labels
+                        maxRotation: 90, // Allow labels to rotate up to 90 degrees
+                        minRotation: 45 // Minimum rotation for labels
+                    }
+                }
+            },
+            elements: {
+                bar: {
+                    barThickness: 'flex' // Adjust bar thickness dynamically
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            plugins: {
+                legend: {
+                    display: false // Hides the legend if not needed
+                },
+                title: {
+                    display: true,
+                    text: 'Total Watt Hours for Selected Date'
+                }
+            }
+        }
+    });
+}
+
+
+
 
 
 
