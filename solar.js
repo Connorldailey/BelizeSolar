@@ -61,6 +61,13 @@ const showContentSectionById = (sectionId) => {
                 displayLiveWattsBarGraph();
                 // Initialize the date picker for the solar overview section
                 initializeDatePicker();
+
+                // Initially hide the watt hours chart container
+                const wattHoursOverviewContainer = document.getElementById('wattHoursOverviewContainer');
+                if (wattHoursOverviewContainer) {
+                    wattHoursOverviewContainer.style.display = 'none';
+                }
+
                 break;
             // Add more cases for other sections if necessary
         }
@@ -68,6 +75,7 @@ const showContentSectionById = (sectionId) => {
         console.error(`No section found with ID: ${sectionId}. Check if the ID is correct.`);
     }
 };
+
 
 // Attach event listeners to navigation links
 document.querySelectorAll('nav .nav-link').forEach(link => {
@@ -1030,7 +1038,7 @@ function displayWattHourSummarySection(siteName) {
 
     // Create a container to store all data
     const wattHourChartDiv = document.createElement('div');
-    wattHourChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3'); // Added mb-3 for some margin at the bottom
+    wattHourChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3');
 
     // Create a div for buttons
     const buttonContainer = document.createElement('div');
@@ -1200,6 +1208,12 @@ function getTotalWattHoursForDate(date) {
 function updateWattHoursChart(date) {
     getTotalWattHoursForDate(date).then(wattHoursBySchool => {
         displayWattHoursBarChart(wattHoursBySchool);
+
+        // Once the chart is loaded, make the watt hours overview container visible
+        const wattHoursOverviewContainer = document.getElementById('wattHoursOverviewContainer');
+        if (wattHoursOverviewContainer) {
+            wattHoursOverviewContainer.style.display = 'block';
+        }
     });
 }
 
@@ -1208,37 +1222,33 @@ function displayWattHoursBarChart(data) {
     // Find or create the container element
     let container = document.getElementById('wattHoursChartContainer');
     if (!container) {
+    	container.innerHTML = '';
         container = document.createElement('div');
         container.id = 'wattHoursChartContainer';
-        container.classList.add('chart-container'); // Add any styling classes necessary
-        container.style.padding = '20px'; // Example styling
-        container.style.border = '1px solid #ccc'; // Example styling
-        container.style.borderRadius = '5px'; // Example styling
-        container.style.backgroundColor = '#fff'; // Example styling
-        container.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; // Example styling
-        container.style.marginTop = '20px'; // Example styling
-        container.style.maxWidth = '1000px'; // Example styling
-        container.style.margin = 'auto'; // Center the container
-
+        container.classList.add('chart-container'); 
+        container.style.padding = '20px';
+        container.style.margin = 'auto';
+        container.style.maxWidth = '1000px'; // Set a max width for the chart container
+        
         // Append the container to the desired parent element
         const solarOverviewContent = document.getElementById('solarOverviewContent');
-        if(solarOverviewContent) {
+        if (solarOverviewContent) {
             solarOverviewContent.appendChild(container);
         } else {
             console.error('Solar overview content element not found.');
             return;
         }
     }
-    // Clear any existing content in the container
-    container.innerHTML = '';
+    container.innerHTML = ''; // Clear any existing content in the container
 
-    // Create a canvas element
+    // Create a canvas element and append it to the container
     const canvas = document.createElement('canvas');
     canvas.id = 'wattHoursBarChart';
-    container.appendChild(canvas); // Append the canvas to the container
+    container.appendChild(canvas);
 
     // Get the context of the canvas
     const ctx = canvas.getContext('2d');
+    
     // Destroy the previous chart instance if it exists
     if (window.wattHoursBarChartInstance) {
         window.wattHoursBarChartInstance.destroy();
@@ -1298,6 +1308,7 @@ function displayWattHoursBarChart(data) {
         }
     });
 }
+
 
 
 

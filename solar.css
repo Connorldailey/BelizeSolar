@@ -25,13 +25,18 @@
 }
 
 .chart-container {
-    padding: 15px;
+    padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #f9f9f9;
-    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+    max-width: 1000px;
+    margin: auto;
 }
 
 .date-picker-container {
-    margin-bottom: 20px; /* Adjust as needed */
+    display: flex;
+    justify-content: left; /* Center the date picker horizontally */
+    margin-bottom: 20px; /* Add some space below the date picker */
 }

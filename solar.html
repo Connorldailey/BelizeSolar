@@ -74,17 +74,23 @@
 			<div id="solarOverviewContent" class="content-section hidden">
 				<h2>Solar Overview</h2>
 				<p>Information about solar energy and its impact in Belize.</p>
-				<!-- Live watts bar graph -->
-				<div id="liveWattsChartContainer"></div>
-				<!-- Container for the date picker and the watt hours chart -->
-				<div id="wattHoursOverviewContainer" class="chart-container">
-					<div id="datePickerContainer" class="date-picker-container">
-						<input type="date" id="wattHoursDate" name="wattHoursDate">
+				<div class="overview-flex-container">
+					<!-- Live watts bar graph container -->
+					<div id="liveWattsChartContainer" class="chart-container">
+						<!-- Chart canvas or placeholder content -->
 					</div>
-					<div id="wattHoursChartContainer"></div>
+					<!-- Date picker and watt hours chart container -->
+					<div id="wattHoursOverviewContainer" class="chart-container">
+						<div id="datePickerContainer" class="date-picker-container">
+							<input type="date" id="wattHoursDate" name="wattHoursDate">
+						</div>
+						<div id="wattHoursChartContainer">
+							<!-- Chart canvas will be dynamically inserted here -->
+						</div>
+					</div>
 				</div>
 			</div>
-	
+
 			<!-- Interactive Map Content (initially hidden) -->
 			<div id="interactiveMapContent" class="content-section hidden">
 				<h2>Interactive Map</h2>
