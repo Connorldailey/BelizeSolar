@@ -13,7 +13,8 @@
 }
 
 .photo, .gauge {
-    grid-column: span 1; /* Each takes up 1 fraction of the space */
+    grid-column: span 1; /* Each takes up 1 fraction of the horizontal space */
+    grid-row: span 1; /* Each takes up 1 fraction of the vertical space */
 }
 
 .info {

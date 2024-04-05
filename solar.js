@@ -215,6 +215,10 @@ function displaySitePhotoSection(siteName) {
     // Create the div that will hold the school name and image
     const sitePhotoDiv = document.createElement('div');
     sitePhotoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+    sitePhotoDiv.style.display = 'flex';
+    sitePhotoDiv.style.flexDirection = 'column';
+    sitePhotoDiv.style.justifyContent = 'center'; // Center content vertically
+    sitePhotoDiv.style.height = '100%'; // Make sure the div uses the full height
 
     // Create and append the school name element
     const schoolNameElement = document.createElement('h3');
@@ -224,16 +228,24 @@ function displaySitePhotoSection(siteName) {
 
     // Create and append the image element
     const imageElement = document.createElement('img');
-    // Replace the 'src' attribute with image path 
     let site = siteName.split(" ").join(""); // Remove spaces from site name
     imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/' + site + '.jpeg';
     imageElement.alt = 'Site Image';
-    imageElement.classList.add('img-fluid', 'rounded', 'mx-auto', 'd-block'); // Make image responsive and center it
+    imageElement.classList.add('img-fluid', 'rounded', 'mx-auto', 'd-block');
+    imageElement.style.maxHeight = '100%'; // Limit the height to the container
+    imageElement.style.objectFit = 'contain'; // Ensure aspect ratio is maintained
     sitePhotoDiv.appendChild(imageElement);
+
+    // Handle image loading errors
+    imageElement.onerror = function() {
+        this.style.display = 'none'; // Hide the image if it fails to load
+        // Additional error handling can be implemented here
+    };
 
     // Append the site photo div to the container
     container.appendChild(sitePhotoDiv);
 }
+
 
 // Displays the watt gauge section
 function displayWattGaugeSection(siteName) {
@@ -244,7 +256,7 @@ function displayWattGaugeSection(siteName) {
     const wattGuageDiv = document.createElement('div');
     wattGuageDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
     wattGuageDiv.style.position = 'relative'; // Relative positioning for JustGage
-    wattGuageDiv.style.height = '300px'; // Set a fixed height for the gauge
+    wattGuageDiv.style.height = '100%'; // Use 100% of parent's height
 
     // Create and append the gauge element with an id that JustGage will use
     const gaugeElement = document.createElement('div');
@@ -259,17 +271,17 @@ function displayWattGaugeSection(siteName) {
     fetchTotalWatts(siteName).then(totalWatts => {
         gauge = new JustGage({
             id: "gauge",
-            value: " " + totalWatts,
+            value: totalWatts,
             min: 0,
             max: 1500,
             title: "Current Watts",
             titleFontSize: 12,
-    		titleFontColor: "black",
-    		titleFontFamily: "Arial",
+            titleFontColor: "black",
+            titleFontFamily: "Arial",
             pointer: true,
-        	gaugeWidthScale: 0.6,
-        	counter: true,
-        	relativeGaugeSize: true
+            gaugeWidthScale: 0.6,
+            counter: true,
+            relativeGaugeSize: true
         });
     }).catch(error => {
         console.error('Error displaying watt gauge:', error);
@@ -539,6 +551,9 @@ function displaySiteInfoSection(siteName) {
     // Create the div that will hold the site info
     const siteInfoDiv = document.createElement('div');
     siteInfoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+    siteInfoDiv.style.display = 'flex';
+    siteInfoDiv.style.flexDirection = 'column';
+    siteInfoDiv.style.height = '100%'; // Use 100% of the container height
 
     // Display general site information
     fetchSiteInfo(siteName).then(siteInfo => {
@@ -548,62 +563,62 @@ function displaySiteInfoSection(siteName) {
         siteInfoDiv.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
         siteInfoDiv.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
     });
-	
-	// Prepare table for system specific info
-	const table = document.createElement('table');
-	table.classList.add('table');
-	const thead = document.createElement('thead');
-	const tbody = document.createElement('tbody');
-	table.appendChild(thead);
-	table.appendChild(tbody);
-	
-	// Table headers
-	const headerRow = document.createElement('tr');
-	['System ID', 'Number of Panels', 'Current Output', 'Max Output', 'Year Installed', 'Limiter'].forEach(headerText => {
-		const header = document.createElement('th')
-		header.textContent = headerText;
-		headerRow.appendChild(header);
-	});
-	thead.appendChild(headerRow);
-	
-	// Display system specific information
-	Promise.all([
-		fetchNumPanels(siteName),
-		fetchSystemWatts(siteName),
-		fetchMaxDailyWatts(siteName),
-		fetchYearInstalled(siteName),
-		fetchLimiterStatus(siteName)
-	]).then(([numPanelsMap, systemWattsMap, maxWattsMap, yearInstalledMap, limiterStatusMap]) => {
-		numPanelsMap.forEach((numPanels, systemId) => {
-			const row = document.createElement('tr');
-			const systemCell = document.createElement('td');
-			systemCell.textContent = systemId;
-			const numPanelsCell = document.createElement('td');
-			numPanelsCell.textContent = numPanels;
-			const currentOutputCell = document.createElement('td');
-			currentOutputCell.textContent = systemWattsMap.get(systemId) || 'N/A';
-			const maxOutputCell = document.createElement('td');
-			maxOutputCell.textContent = maxWattsMap.get(systemId) || 'N/A';
-			const yearInstalledCell = document.createElement('td');
-			yearInstalledCell.textContent = yearInstalledMap.get(systemId) || 'N/A';
-			const limiterStatusCell = document.createElement('td');
-			limiterStatusCell.textContent = limiterStatusMap.get(systemId) || 'N/A';
-			// Append rows
-			row.appendChild(systemCell);
-			row.appendChild(numPanelsCell);
-			row.appendChild(currentOutputCell);
-			row.appendChild(maxOutputCell);
-			row.appendChild(yearInstalledCell);
-			row.appendChild(limiterStatusCell);
-			tbody.appendChild(row);
-		});
-		siteInfoDiv.appendChild(table);
-	})
-	.catch(error => {
-		console.error('Error fetching system information:', error);
-	});
-	// Append the site info div to the container
+
+    // Create a container for the table that will hold system specific information
+    const tableContainer = document.createElement('div');
+    tableContainer.classList.add('table-responsive');
+    siteInfoDiv.appendChild(tableContainer);
+
+    // Prepare table for system specific info
+    const table = document.createElement('table');
+    table.classList.add('table');
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    // Table headers
+    const headerRow = document.createElement('tr');
+    ['System ID', 'Number of Panels', 'Current Output', 'Max Output', 'Year Installed', 'Limiter'].forEach(headerText => {
+        const header = document.createElement('th');
+        header.textContent = headerText;
+        headerRow.appendChild(header);
+    });
+    thead.appendChild(headerRow);
+
+    // Fetch and display system specific information
+    Promise.all([
+        fetchNumPanels(siteName),
+        fetchSystemWatts(siteName),
+        fetchMaxDailyWatts(siteName),
+        fetchYearInstalled(siteName),
+        fetchLimiterStatus(siteName)
+    ]).then(([numPanelsMap, systemWattsMap, maxWattsMap, yearInstalledMap, limiterStatusMap]) => {
+        numPanelsMap.forEach((numPanels, systemId) => {
+            const row = document.createElement('tr');
+            row.appendChild(createCell(systemId));
+            row.appendChild(createCell(numPanels));
+            row.appendChild(createCell(systemWattsMap.get(systemId)));
+            row.appendChild(createCell(maxWattsMap.get(systemId)));
+            row.appendChild(createCell(yearInstalledMap.get(systemId)));
+            row.appendChild(createCell(limiterStatusMap.get(systemId)));
+            tbody.appendChild(row);
+        });
+        // Now that data is loaded, append the table to the table container
+        tableContainer.appendChild(table);
+    })
+    .catch(error => {
+        console.error('Error fetching system information:', error);
+    });
+
+    // Append the site info div to the container
     container.appendChild(siteInfoDiv);
+}
+
+function createCell(text) {
+    const cell = document.createElement('td');
+    cell.textContent = text || 'N/A'; // Default to 'N/A' if text is falsy
+    return cell;
 }
 
 // Helper function to create info elements
@@ -714,7 +729,8 @@ function displayDailyWattsGraph(siteName) {
             },
             options: {
             	responsive: true,
-    			maintainAspectRatio: false,
+            	maintainAspectRatio: true, // Set to true to respect the aspect ratio
+            	aspectRatio: 2, // Define the aspect ratio of the chart
     			plugins: {
 					title: {
 						display: true,
@@ -739,8 +755,14 @@ function displayDailyWattsGraph(siteName) {
         });
     	const chartContainer = document.getElementById('wattsTimeChartContainer');
         if (chartContainer) {
-            chartContainer.innerHTML = ''; // Clear any existing content
-            chartContainer.appendChild(wattLineChartDiv); // Append the div (which now contains the canvas and the chart)
+            chartContainer.innerHTML = '';
+            chartContainer.appendChild(wattLineChartDiv);
+
+            // Ensure the canvas fills the div, which in turn fills the chart container
+            wattLineChartDiv.style.width = '100%';
+            wattLineChartDiv.style.height = '100%'; // Make div fill its container
+            canvas.style.width = '100%'; // Canvas fills the div
+            canvas.style.height = '100%'; // Respect the div's height
         }
     }).catch(error => {
         console.error('Error creating line graph:', error);
@@ -1052,17 +1074,17 @@ function displayWattHourYearSummaryGraph(siteName) {
 
 // Sets up graph container with buttons and displays the weekly watt hour chart by default
 function displayWattHourSummarySection(siteName) {
-    // id="graphSection" in HTML where this container will be appended
     const root = document.getElementById('graphSection');
     root.innerHTML = ''; // Clear existing content
 
     // Create a container to store all data
     const wattHourChartDiv = document.createElement('div');
-    wattHourChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3');
+    wattHourChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3', 'd-flex', 'flex-column');
+    wattHourChartDiv.style.height = '100%'; // Ensure it fills the parent container
 
     // Create a div for buttons
     const buttonContainer = document.createElement('div');
-    buttonContainer.classList.add('d-flex', 'justify-content-between', 'mb-4'); // Flexbox for layout, mb-4 for margin bottom
+    buttonContainer.classList.add('d-flex', 'justify-content-between', 'mb-4');
 
     // Create buttons for week and year summaries
     const weekButton = document.createElement('button');
@@ -1072,7 +1094,7 @@ function displayWattHourSummarySection(siteName) {
 
     const yearButton = document.createElement('button');
     yearButton.innerText = 'Year Summary';
-    yearButton.classList.add('btn', 'btn-secondary'); // Assuming Bootstrap for styling
+    yearButton.classList.add('btn', 'btn-secondary');
     yearButton.onclick = () => displayWattHourYearSummaryGraph(siteName);
 
     // Append buttons to the buttonContainer
@@ -1082,11 +1104,11 @@ function displayWattHourSummarySection(siteName) {
     // Append the buttonContainer to the wattHourChartDiv
     wattHourChartDiv.appendChild(buttonContainer);
 
-    // Create another div for the chart
+    // Create another div for the chart, adapting it for dynamic height
     const chartBoxContainer = document.createElement('div');
-    chartBoxContainer.id = 'chartContainer'; // This will be targeted by the chart display functions
-    chartBoxContainer.classList.add('border', 'rounded', 'bg-white', 'p-3', 'd-flex', 'justify-content-center', 'align-items-center'); // Flexbox for centering
-    chartBoxContainer.style.height = '400px'; // Set a height for the chart container
+    chartBoxContainer.id = 'chartContainer';
+    chartBoxContainer.classList.add('border', 'rounded', 'bg-white', 'p-3', 'flex-grow-1', 'd-flex', 'justify-content-center', 'align-items-center');
+    // Allows it to grow and fill available space, adjusting to dynamic height
 
     // Append the chartBoxContainer to the wattHourChartDiv
     wattHourChartDiv.appendChild(chartBoxContainer);
@@ -1263,18 +1285,23 @@ let showAllSitesWattHours = false;
 
 // Function to display the watt hour bar chart for all sites in a container
 function displayWattHoursBarChart(data) {
+    // Select the outer container and the chart container elements
     let outerContainer = document.getElementById('wattHoursChartOuterContainer');
     let chartContainer = document.getElementById('wattHoursChartContainer');
 
+    // Check for the existence of the containers
     if (!outerContainer || !chartContainer) {
         console.error('Watt hours chart container elements not found.');
         return;
     }
 
-    // Clear any previous content in the chart container
+    // Clear the existing content in the chart container
     chartContainer.innerHTML = '';
 
-    // Create or update the canvas for the chart
+    // Filter the data if necessary
+    let filteredData = showAllSitesWattHours ? data : new Map([...data].filter(([_, value]) => value > 0));
+
+    // Create a new canvas element for the chart
     const canvas = document.createElement('canvas');
     chartContainer.appendChild(canvas);
     const ctx = canvas.getContext('2d');
@@ -1284,10 +1311,7 @@ function displayWattHoursBarChart(data) {
         window.wattHoursBarChartInstance.destroy();
     }
 
-    // Filter the data based on the current state of showAllSitesWattHours
-    let filteredData = showAllSitesWattHours ? data : new Map([...data].filter(([_, value]) => value > 0));
-
-    // Instantiate the new chart instance
+    // Instantiate a new chart instance
     window.wattHoursBarChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1300,21 +1324,18 @@ function displayWattHoursBarChart(data) {
                 borderWidth: 1
             }]
         },
-        options: getChartOptions('Total Watt Hours for Selected Date') // Use the existing function for options
+        options: getChartOptions('Total Watt Hours for Selected Date') // Use a function to get chart options
     });
 
-    // Handle the toggle button functionality
+    // Toggle button functionality
     let toggleButton = document.getElementById('toggleWattHoursButton');
+    toggleButton.textContent = showAllSitesWattHours ? "Show Active Sites Only" : "Show All Sites";
     toggleButton.onclick = function() {
         showAllSitesWattHours = !showAllSitesWattHours;
-        updateWattHoursChart(document.getElementById('wattHoursDate').value).then(() => {
-            toggleButton.textContent = showAllSitesWattHours ? "Show Active Sites Only" : "Show All Sites";
-            // Update the chart data and redraw the chart
-            displayWattHoursBarChart(filteredData);
-        });
+        displayWattHoursBarChart(data); // Redraw the chart with the current data state
     };
 
-    // Make sure the outer container is visible now
+    // Make the outer container visible
     outerContainer.style.display = 'block';
 }
 
