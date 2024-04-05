@@ -81,11 +81,16 @@
 					</div>
 					<!-- Date picker and watt hours chart container -->
 					<div id="wattHoursOverviewContainer" class="chart-container">
-						<div id="datePickerContainer" class="date-picker-container">
-							<input type="date" id="wattHoursDate" name="wattHoursDate">
+						<div class="controls-container">
+							<div id="datePickerContainer" class="date-picker-container">
+								<input type="date" id="wattHoursDate" name="wattHoursDate">
+							</div>
+							<button id="toggleWattHoursButton" class="btn btn-secondary">Show All Sites</button>
 						</div>
-						<div id="wattHoursChartContainer">
-							<!-- Chart canvas will be dynamically inserted here -->
+						<div id="wattHoursChartOuterContainer" class="chart-outer-container">
+							<div id="wattHoursChartContainer">
+								<!-- Chart canvas will be dynamically inserted here -->
+							</div>
 						</div>
 					</div>
 				</div>

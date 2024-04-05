@@ -31,8 +31,9 @@
     background-color: #f8f9fa;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-top: 20px;
-    max-width: 1000px;
     margin: auto;
+    flex-basis: 48%; /* Gives each container a base width, but allows for some flexibility */
+    max-width: 48%; /* Prevents containers from growing beyond this width */
 }
 
 .date-picker-container {
@@ -40,3 +41,33 @@
     justify-content: left; /* Center the date picker horizontally */
     margin-bottom: 20px; /* Add some space below the date picker */
 }
+
+.controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; 
+}
+
+.overview-flex-container {
+    display: flex;
+    justify-content: space-around; /* This will space out the child containers evenly */
+    align-items: flex-start; /* Align items at the start of the flex container */
+    flex-wrap: wrap; /* Allow items to wrap onto the next line if not enough space */
+}
+
+.chart-outer-container {
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+    margin: auto;
+    display: none; /* Initially hidden */
+}
+
+
+
+
+

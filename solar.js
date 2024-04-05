@@ -61,7 +61,13 @@ const showContentSectionById = (sectionId) => {
                 displayLiveWattsBarGraph();
                 // Initialize the date picker for the solar overview section
                 initializeDatePicker();
-
+				
+				// Initially hide the live watts chart container
+                const liveWattsChartContainer = document.getElementById('liveWattsChartContainer');
+                if (liveWattsChartContainer) {
+                    liveWattsChartContainer.style.display = 'none';
+                }
+                
                 // Initially hide the watt hours chart container
                 const wattHoursOverviewContainer = document.getElementById('wattHoursOverviewContainer');
                 if (wattHoursOverviewContainer) {
@@ -902,31 +908,40 @@ function fetchWattHoursForYear(siteName) {
     });
 }
 
-// Displays the weekly watt hour summary bar graph (by day)
+// Helper function to format date as "Day, Month Date"
+function formatDateWithDay(dateString) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const date = new Date(dateString);
+    const dayName = days[date.getDay()];
+    const monthName = months[date.getMonth()];
+    const dayOfMonth = date.getDate();
+    
+    return `${dayName}, ${monthName} ${dayOfMonth}`;
+}
+
 function displayWattHourWeekSummaryGraph(siteName) {
     fetchWattHoursForWeek(siteName).then(weeklyWattMap => {
-        const labels = Array.from(weeklyWattMap.keys()); // Days of the week
-        const dataPoints = Array.from(weeklyWattMap.values()); // Watt hours for each day
+        // Apply the new date formatting and reverse the order of labels and data points
+        const labels = Array.from(weeklyWattMap.keys()).reverse().map(formatDateWithDay);
+        const dataPoints = Array.from(weeklyWattMap.values()).reverse();
 
-        // Target the chartContainer directly, ensuring it's part of the initial setup
         const graphContainer = document.getElementById('chartContainer');
-        graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
+        graphContainer.innerHTML = ''; // Clear the container
 
-        // Create a canvas for the chart
         const canvas = document.createElement('canvas');
         graphContainer.appendChild(canvas);
 
-        // Get the context of the canvas
         const ctx = canvas.getContext('2d');
 
-        // Create the bar graph
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels, // Days of the week
+                labels: labels, // Formatted date labels
                 datasets: [{
                     label: 'Watt Hours',
-                    data: dataPoints, // Watt hours for each day
+                    data: dataPoints,
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
@@ -962,33 +977,38 @@ function displayWattHourWeekSummaryGraph(siteName) {
     });
 }
 
+// Helper function to format the month-year labels
+function formatMonthYearLabel(dateString) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const [year, month] = dateString.split('-');
+    const monthIndex = parseInt(month, 10) - 1; // Convert "mm" format into a zero-based index
+    const monthName = months[monthIndex];
+    return `${monthName} ${year}`;
+}
+
 // Displays the yearly watt hour summary bar graph (by month)
 function displayWattHourYearSummaryGraph(siteName) {
     fetchWattHoursForYear(siteName).then(yearlyWattMap => {
-        // Prepare the labels and dataPoints arrays from the map
-        const labels = Array.from(yearlyWattMap.keys()); // Months
+        // Use the formatMonthYearLabel function to format labels
+        const labels = Array.from(yearlyWattMap.keys()).map(formatMonthYearLabel); // Format "yyyy-mm" to "Month yyyy"
         const dataPoints = Array.from(yearlyWattMap.values()); // Watt hours for each month
 
-        // Ensure the graphContainer is correctly targeted and exists in your HTML
         const graphContainer = document.getElementById('chartContainer');
         if (graphContainer) {
-            graphContainer.innerHTML = ''; // Clear the container before rendering a new graph
+            graphContainer.innerHTML = ''; // Clear the container
 
-            // Create a canvas for the chart and append it to the graphContainer
             const canvas = document.createElement('canvas');
             graphContainer.appendChild(canvas);
 
-            // Get the context of the canvas to draw the chart
             const ctx = canvas.getContext('2d');
 
-            // Instantiate the Chart.js chart
             new Chart(ctx, {
-                type: 'bar', // Choose 'bar' for bar graph, can be changed to 'line' for a line graph
+                type: 'bar',
                 data: {
-                    labels: labels, // X-axis labels (months)
+                    labels: labels, // Formatted date labels
                     datasets: [{
                         label: 'Watt Hours',
-                        data: dataPoints, // Y-axis data points (watt hours for each month)
+                        data: dataPoints,
                         backgroundColor: 'rgba(153, 102, 255, 0.2)',
                         borderColor: 'rgba(153, 102, 255, 1)',
                         borderWidth: 1
@@ -1094,38 +1114,51 @@ function getLiveWattsBySchool() {
 	});
 }
 
-// Displays a bar graph of live watts for each school on the solar overview page
+// Global flag to keep track of which sites to display
+let showAllSites = false;
+
 const displayLiveWattsBarGraph = () => {
     getLiveWattsBySchool().then(liveWatts => {
-        // Ensure the graphContainer is correctly targeted and exists
         const graphContainer = document.getElementById('liveWattsChartContainer');
         if (graphContainer) {
             graphContainer.innerHTML = ''; // Clear the container
+            graphContainer.style.display = 'none';
 
-            // Create a container for the chart
+            // Button for toggling the view
+            const toggleButton = document.createElement('button');
+            toggleButton.textContent = 'Show All Sites';
+            toggleButton.classList.add('btn', 'btn-secondary');
+            toggleButton.onclick = () => {
+                showAllSites = !showAllSites;
+                displayLiveWattsBarGraph(); // Redraw the graph with the updated filter
+            };
+            graphContainer.appendChild(toggleButton);
+
+            // Filter sites based on the flag
+            const filteredLiveWatts = showAllSites ? liveWatts : new Map([...liveWatts].filter(([key, value]) => value > 0));
+
+            // Update button text based on the current state
+            toggleButton.textContent = showAllSites ? 'Show Active Sites Only' : 'Show All Sites';
+
             const chartDiv = document.createElement('div');
             chartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
-            chartDiv.style.maxWidth = '1000px'; // Set a max width for the chart container
-			chartDiv.style.margin = 'auto'; // Center the container
+            chartDiv.style.maxWidth = '1000px';
+            chartDiv.style.margin = 'auto';
 
-            graphContainer.appendChild(chartDiv);
-
-            // Create a canvas and append to chartDiv
             const canvas = document.createElement('canvas');
             chartDiv.appendChild(canvas);
             const ctx = canvas.getContext('2d');
 
-            // Prepare labels and dataPoints
-            const labels = Array.from(liveWatts.keys());
-            const dataPoints = labels.map(label => liveWatts.get(label) || 0); // Use 0 if no watts data
+            const labels = Array.from(filteredLiveWatts.keys());
+            const dataPoints = labels.map(label => filteredLiveWatts.get(label) || 0);
 
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels, // Site names
+                    labels: labels,
                     datasets: [{
                         label: 'Live Watts',
-                        data: dataPoints, // Watts data or 0
+                        data: dataPoints,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
@@ -1162,6 +1195,9 @@ const displayLiveWattsBarGraph = () => {
                     }
                 }
             });
+
+            graphContainer.appendChild(chartDiv);
+            graphContainer.style.display = 'block';
         }
     }).catch(error => {
         console.error('Error displaying live watts bar graph:', error);
@@ -1206,108 +1242,125 @@ function getTotalWattHoursForDate(date) {
 
 // Fetch data and update the chart
 function updateWattHoursChart(date) {
-    getTotalWattHoursForDate(date).then(wattHoursBySchool => {
-        displayWattHoursBarChart(wattHoursBySchool);
-
-        // Once the chart is loaded, make the watt hours overview container visible
-        const wattHoursOverviewContainer = document.getElementById('wattHoursOverviewContainer');
-        if (wattHoursOverviewContainer) {
-            wattHoursOverviewContainer.style.display = 'block';
-        }
+    return new Promise((resolve, reject) => {
+        getTotalWattHoursForDate(date).then(wattHoursBySchool => {
+            displayWattHoursBarChart(wattHoursBySchool);
+            // Once the chart is loaded, make the watt hours overview container visible
+            const wattHoursOverviewContainer = document.getElementById('wattHoursOverviewContainer');
+            if (wattHoursOverviewContainer) {
+                wattHoursOverviewContainer.style.display = 'block';
+            }
+            resolve(); // Resolve the promise after the chart has been updated
+        }).catch(error => {
+            console.error('Error updating watt hours chart:', error);
+            reject(error); // Reject the promise on error
+        });
     });
 }
 
+// Global variable specific to the watt hours chart
+let showAllSitesWattHours = false;
+
 // Function to display the watt hour bar chart for all sites in a container
 function displayWattHoursBarChart(data) {
-    // Find or create the container element
-    let container = document.getElementById('wattHoursChartContainer');
-    if (!container) {
-    	container.innerHTML = '';
-        container = document.createElement('div');
-        container.id = 'wattHoursChartContainer';
-        container.classList.add('chart-container'); 
-        container.style.padding = '20px';
-        container.style.margin = 'auto';
-        container.style.maxWidth = '1000px'; // Set a max width for the chart container
-        
-        // Append the container to the desired parent element
-        const solarOverviewContent = document.getElementById('solarOverviewContent');
-        if (solarOverviewContent) {
-            solarOverviewContent.appendChild(container);
-        } else {
-            console.error('Solar overview content element not found.');
-            return;
-        }
+    let outerContainer = document.getElementById('wattHoursChartOuterContainer');
+    let chartContainer = document.getElementById('wattHoursChartContainer');
+
+    if (!outerContainer || !chartContainer) {
+        console.error('Watt hours chart container elements not found.');
+        return;
     }
-    container.innerHTML = ''; // Clear any existing content in the container
 
-    // Create a canvas element and append it to the container
+    // Clear any previous content in the chart container
+    chartContainer.innerHTML = '';
+
+    // Create or update the canvas for the chart
     const canvas = document.createElement('canvas');
-    canvas.id = 'wattHoursBarChart';
-    container.appendChild(canvas);
-
-    // Get the context of the canvas
+    chartContainer.appendChild(canvas);
     const ctx = canvas.getContext('2d');
-    
+
     // Destroy the previous chart instance if it exists
     if (window.wattHoursBarChartInstance) {
         window.wattHoursBarChartInstance.destroy();
     }
 
-    // Create a new chart instance
+    // Filter the data based on the current state of showAllSitesWattHours
+    let filteredData = showAllSitesWattHours ? data : new Map([...data].filter(([_, value]) => value > 0));
+
+    // Instantiate the new chart instance
     window.wattHoursBarChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: Array.from(data.keys()),
+            labels: Array.from(filteredData.keys()),
             datasets: [{
                 label: 'Total Watt Hours',
-                data: Array.from(data.values()),
+                data: Array.from(filteredData.values()),
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
             }]
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Watt Hours'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'School'
-                    },
-                    ticks: {
-                        autoSkip: false, // Do not skip labels
-                        maxRotation: 90, // Allow labels to rotate up to 90 degrees
-                        minRotation: 45 // Minimum rotation for labels
-                    }
-                }
-            },
-            elements: {
-                bar: {
-                    barThickness: 'flex' // Adjust bar thickness dynamically
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: 2,
-            plugins: {
-                legend: {
-                    display: false // Hides the legend if not needed
-                },
+        options: getChartOptions('Total Watt Hours for Selected Date') // Use the existing function for options
+    });
+
+    // Handle the toggle button functionality
+    let toggleButton = document.getElementById('toggleWattHoursButton');
+    toggleButton.onclick = function() {
+        showAllSitesWattHours = !showAllSitesWattHours;
+        updateWattHoursChart(document.getElementById('wattHoursDate').value).then(() => {
+            toggleButton.textContent = showAllSitesWattHours ? "Show Active Sites Only" : "Show All Sites";
+            // Update the chart data and redraw the chart
+            displayWattHoursBarChart(filteredData);
+        });
+    };
+
+    // Make sure the outer container is visible now
+    outerContainer.style.display = 'block';
+}
+
+function getChartOptions(title) {
+    return {
+        scales: {
+            y: {
+                beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Total Watt Hours for Selected Date'
+                    text: 'Watt Hours'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'School'
+                },
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 45
                 }
             }
+        },
+        elements: {
+            bar: {
+                barThickness: 'flex'
+            }
+        },
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 2,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: title
+            }
         }
-    });
+    };
 }
+
+
 
 
 
