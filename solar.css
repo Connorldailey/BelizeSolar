@@ -1,3 +1,18 @@
+html, body {
+    height: 100%; /* Make sure the HTML and body are full height */
+    margin: 0; /* Reset default margin */
+}
+
+body {
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    min-height: 100vh; /* Minimum height of viewport */
+}
+
+.jumbotron {
+    flex: 1; /* Allows jumbotron to expand and fill available space, pushing the footer down */
+}
+
 .grid-container {
     display: grid;
     height: 100vh; /* Make the grid container half the height of the viewport */

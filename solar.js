@@ -35,7 +35,7 @@ const loadSiteContent = (siteName) => {
     displaySiteInfoSection(siteName);
     displayDailyWattsGraph(siteName);
     displayWattHourSummarySection(siteName);
-
+    
     // Make the site content container visible after loading new content
     document.getElementById('siteContentContainer').style.display = 'block';
 };
@@ -82,7 +82,6 @@ const showContentSectionById = (sectionId) => {
     }
 };
 
-
 // Attach event listeners to navigation links
 document.querySelectorAll('nav .nav-link').forEach(link => {
     link.addEventListener('click', (event) => {
@@ -95,6 +94,18 @@ document.querySelectorAll('nav .nav-link').forEach(link => {
             // Update navigation link active status
             document.querySelectorAll('nav .nav-link').forEach(navLink => navLink.classList.remove('active'));
             link.classList.add('active');
+        }
+    });
+});
+
+// Attach event listeners to card buttons
+document.querySelectorAll('.card .btn').forEach(button => {
+    button.addEventListener('click', (event) => {
+        // Retrieve the 'data-target' attribute to identify the target section
+        const targetId = button.getAttribute('data-target');
+        if (targetId) {
+            event.preventDefault(); // Prevent default link behavior
+            showContentSectionById(targetId); // Show the targeted content section
         }
     });
 });
@@ -1381,15 +1392,38 @@ function getChartOptions(title) {
     };
 }
 
+// Returns current live watts for the entire country
+function fetchLiveWattsForCountry() {
+	let liveWatts = 0;
+	return getLiveWattsBySchool().then(data => {
+		data.forEach(watts => {
+			liveWatts += watts; // Sum up the live watts from each school
+		});
+		// console.log(liveWatts);
+		return liveWatts;
+	}).catch(error => {
+		console.error('Failed to fetch live watts:', error);
+		throw error;
+	});
+}
 
-
-
-
-
-
-
-
-
-
+// Returns watt hours for the entire country today
+function fetchTotalWattHoursForToday() {
+    const today = new Date();
+    // Format date as 'YYYY-MM-DD' expected by getTotalWattHoursForDate
+    const dateString = today.toISOString().split('T')[0];
+    
+    let totalWattHours = 0;
+    return getTotalWattHoursForDate(dateString).then(wattHoursBySchool => {
+        wattHoursBySchool.forEach(wattHours => {
+        	totalWattHours += wattHours;
+        })
+        //console.log('Total watt hours for all sites:', totalWattHours);
+        return totalWattHours;
+    }).catch(error => {
+        console.error('Failed to calculate total watt hours for today:', error);
+        throw error;
+    });
+}
 
 
