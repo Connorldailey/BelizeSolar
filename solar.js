@@ -54,6 +54,17 @@ const showContentSectionById = (sectionId) => {
     if (section) {
         section.style.display = 'block'; // Show the section if found
 
+        // Collapse the accordion if navigating back to the home page
+        if (sectionId === 'homeContent') {
+            // This assumes you are using Bootstrap's collapse feature
+            // Replace '#collapseSchools' with the actual ID of your accordion collapse element
+            const accordionElement = document.getElementById('collapseSchools');
+            const bsCollapse = new bootstrap.Collapse(accordionElement, {
+                toggle: false // This ensures the accordion is hidden, not toggled
+            });
+            bsCollapse.hide(); // Explicitly hide the accordion
+        }
+
         // Perform specific initializations based on the sectionId
         switch (sectionId) {
             case 'solarOverviewContent':
@@ -61,8 +72,8 @@ const showContentSectionById = (sectionId) => {
                 displayLiveWattsBarGraph();
                 // Initialize the date picker for the solar overview section
                 initializeDatePicker();
-				
-				// Initially hide the live watts chart container
+                
+                // Initially hide the live watts chart container
                 const liveWattsChartContainer = document.getElementById('liveWattsChartContainer');
                 if (liveWattsChartContainer) {
                     liveWattsChartContainer.style.display = 'none';
@@ -73,7 +84,6 @@ const showContentSectionById = (sectionId) => {
                 if (wattHoursOverviewContainer) {
                     wattHoursOverviewContainer.style.display = 'none';
                 }
-
                 break;
             // Add more cases for other sections if necessary
         }
