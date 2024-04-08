@@ -113,6 +113,7 @@ document.querySelectorAll('.card .btn').forEach(button => {
 // Initialize the website content once the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     populateDropdown(); // Populate the schools dropdown menu
+    populateAccordion(); // Populate the schools accordian
     showContentSectionById('homeContent'); // Show the home content by default
 });
 
@@ -212,8 +213,38 @@ function populateDropdown() {
     });
 }
 
+// Function to populate the accordion with school links
+function populateAccordion() {
+    processSites().then(processedSites => {
+        const accordionBody = document.querySelector('#collapseSchools .accordion-body ul.list-group');
+        // Clear existing items in the accordion body
+        accordionBody.innerHTML = '';
+        // Iterate over the sites and create a list item for each
+        processedSites.forEach(site => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('list-group-item');
+            const link = document.createElement('a');
+            link.href = '#'; // Use real href if applicable
+            link.textContent = site;
+            link.classList.add('dropdown-item'); // Reuse the dropdown-item class or create a specific one for the accordion
+            // Add a click event listener for each school link
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default anchor action
+                // Call a function to change the page content based on the site clicked
+                loadSiteInfo(site); // Make sure this function exists and does what you expect
+            });
+
+            listItem.appendChild(link);
+            accordionBody.appendChild(listItem);
+        });
+    }).catch(error => {
+        console.error('Error populating accordion:', error);
+    });
+}
+
 // Call populateDropdown when the page is ready or when it's appropriate to load the sites
 document.addEventListener('DOMContentLoaded', populateDropdown);
+document.addEventListener('DOMContentLoaded', populateAccordion);
 
 // Displays the school name and picture section
 function displaySitePhotoSection(siteName) {

@@ -139,31 +139,24 @@
 					</div>
 				</div>
 				
-				<div id="accordion">
-					<div class="card">
-						<div class="card-header" id="headingOne">
-							<h5 class="mb-0">
-								<button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-									Schools
-								</button>
-							</h5>
-						</div>
-
-						<div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-							<div class="card-body">
-								<ul class="list-unstyled">
-									<!-- Dynamically populate this list with school names -->
-									<li><a href="#">Victorious Believers Primary</a></li>
-									<li><a href="#">Saint Andrews Primary School</a></li>
-									<li><a href="#">Sarteneja Nazarene Primary School</a></li>
-									<!-- Add more schools here -->
+				<!-- Accordian Structure -->
+				<div class="accordion" id="schoolsAccordion">
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="headingSchools">
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSchools" aria-expanded="false" aria-controls="collapseSchools">
+								Schools
+							</button>
+						</h2>
+						<div id="collapseSchools" class="accordion-collapse collapse" aria-labelledby="headingSchools" data-bs-parent="#schoolsAccordion">
+							<div class="accordion-body">
+								<!-- School Links Will Be Populated Here -->
+								<ul class="list-group">
+									<!-- Populated by populateAccordion() -->
 								</ul>
 							</div>
 						</div>
 					</div>
-					<!-- Add more accordions as needed for different categories -->
 				</div>
-
 
 			</div>
 	
