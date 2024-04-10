@@ -53,7 +53,7 @@ const showContentSectionById = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
         section.style.display = 'block'; // Show the section if found
-
+		
         // Collapse the accordion if navigating back to the home page
         if (sectionId === 'homeContent') {
             // This assumes you are using Bootstrap's collapse feature

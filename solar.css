@@ -1,16 +1,33 @@
 html, body {
     height: 100%; /* Make sure the HTML and body are full height */
     margin: 0; /* Reset default margin */
+    padding: 0; /* Reset default padding */
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
 }
 
 body {
-    display: flex;
-    flex-direction: column; /* Stack content vertically */
-    min-height: 100vh; /* Minimum height of viewport */
+    min-height: 100vh; /* Make sure the body takes up 100% of the viewport */
 }
 
 .jumbotron {
-    flex: 1; /* Allows jumbotron to expand and fill available space, pushing the footer down */
+    flex: 1; /* Allows jumbotron to expand and fill available space */
+}
+
+.navbar {
+    min-height: 8vh; /* Set the navbar to take up 10% of the viewport height */
+}
+
+.navbar .nav-link {
+    font-size: 1.4rem; /* Adjust the font size */
+    padding: 0.5rem 1.25rem !important; /* Adjust top/bottom padding and left/right padding */
+}
+
+.navbar-brand {
+    font-size: 1.5rem !important; /* Adjust the font size */
+    padding: 0.5rem 0; /* Adjust top/bottom padding */
+    padding-left: 1rem; /* Adjust left padding */
 }
 
 .grid-container {
@@ -82,6 +99,63 @@ body {
     margin: auto;
     display: none; /* Initially hidden */
 }
+
+.map-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Use the viewport height to size the container */
+    justify-content: space-between; /* This will place content at top and bottom of the container */
+}
+
+.map-info {
+    text-align: center; /* Centers the text for smaller devices */
+    padding: 10px;
+}
+
+.map-image-container {
+    flex: 1; /* This allows the image container to fill the remaining space */
+    display: flex;
+    align-items: center; /* Centers the image vertically */
+    justify-content: center; /* Centers the image horizontally */
+    padding: 10px;
+}
+
+.img-fluid {
+    max-width: 100%; /* Ensures the image is never wider than its container */
+    max-height: 75vh; /* Limits the image height to 75% of the viewport height */
+    object-fit: contain; /* Ensures the image maintains its aspect ratio without being cropped */
+}
+
+/* Hero Section */
+.hero-section {
+  background: url('Images/belize-aerial.png') no-repeat center center;
+  background-size: cover;
+  height: 92vh; /* Height of the viewport */
+  display: flex;
+  align-items: center; /* Vertically center the text */
+  justify-content: center; /* Horizontally center the text */
+  text-align: center;
+  color: white; 
+  position: relative;
+  z-index: 2;
+  
+}
+
+.hero-text {
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.hero-section h1 {
+  font-size: 5rem; /* Large font size for the main title */
+  margin-bottom: 0.5rem;
+}
+
+.hero-section p {
+  font-size: 3rem; /* Large font size for the subtitle */
+  margin-bottom: 0;
+}
+
 
 
 

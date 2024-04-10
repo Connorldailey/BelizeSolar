@@ -46,7 +46,7 @@
 						</li>
 
 						<li class="nav-item">
-							<a class="nav-link" data-target="interactiveMapContent" href="#">Interactive Map</a>
+							<a class="nav-link" data-target="solarMapContent" href="#">Solar Map</a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" data-target="learnMoreContent" href="#">Learn More</a>
@@ -60,127 +60,134 @@
 			</div>
 		</nav>
 		
-		<!-- Jumbotron to display content for any page-->
+		<!-- Jumbotron to display content for any page -->
 		<div class="jumbotron flex-grow-1">
 
 			<!-- Home Content -->
 			<div id="homeContent" class="content-section">
-				<!-- Header -->
-				<section class="bg-secondary text-light p-5 p-lg-0 pt-lg-5 text-center text-sm-start">
-					<div class="container">
-						<div class="d-sm-flex align-items-center justify-content-between p-5">
-						<div>
-							<h1> Empowering Education through <span class="text-warning"> Solar Energy </span></h1>
-							<p class="lead my-4">
-								Welcome to the Belize Solar Project, an initiative dedicated to installing
-								solar power systems in schools across Belize. Since 2014, our mission has 
-								been to illuminate educational paths for students with renewable energy, 
-								ensuring that limited resources and geographical barriers do not dim their
-								learning opportunities.
+				<!-- Hero Section -->
+				<div id="heroSection" class="hero-section">
+					<div class="hero-text">
+						<h1>Belize Solar Project</h1>
+						<p>Empowering Education through Solar Energy</p>
+						<!-- Learn More Button -->
+    					<a href="#mainContent" class="btn btn-primary btn-lg mt-4" role="button" aria-pressed="true">Learn More</a>
+				  	</div>
+				</div>
+				<!-- Content below the hero section -->
+				<div id="mainContent">
+					<!-- Project Introduction Section -->
+					<div class="bg-white p-5">
+						<div class="container">
+							<div class="row align-items-center">
+								<!-- Image Column -->
+							  	<div class="col-lg-6 mb-4 mb-lg-0">
+									<img src="Images/SolarPowerForSchools.jpg" alt="Solar Panel Installation" class="img-fluid rounded" style="max-width: 85%; height: auto;">
+							  	</div>
+							  	<!-- Text Column -->
+							  	<div class="col-lg-6">
+									<h1> Empowering Education through <span class="text-warning"> Solar Energy </span></h1>
+									<p class="lead">
+										Welcome to the Belize Solar Project, an initiative dedicated to installing
+										solar power systems in schools across Belize. Since 2014, our mission has 
+										been to illuminate educational paths for students with renewable energy, 
+										ensuring that limited resources and geographical barriers do not dim their
+										learning opportunities.
+									</p>
+									<p class="lead">
+								  		Our initiative focuses on harnessing solar energy to provide a sustainable power source 
+								  		for schools. By equipping educational institutions with solar panels, we're not only 
+								  		reducing the carbon footprint but also ensuring consistent electricity in remote areas, 
+								  		thus empowering students to study without interruption.
+									</p>
+									<p class="lead">
+								  		The impact extends beyond illumination, as students learn about renewable energy and its 
+								  		significance in the modern world, fostering a new generation of eco-conscious individuals.
+									</p>
+								</div>
+							</div>
+					  	</div>
+					</div>
+					<!-- School Information Section -->
+					<div class="bg-light text-dark p-5">
+						<div class="container">
+							<h2 class="text-center mb-4">See the Impact</h2>
+							<p class="text-center">
+								With <strong>31 Solar Systems</strong> installed across <strong>19 Schools</strong>, 
+								we're lighting the way for a sustainable educational future in Belize. 
+								Our hands-on projects engage students and communities, turning optimism into tangible outcomes.
 							</p>
-					</div>
-				</section>
-				<!-- Our Impact Section -->
-				<div class="bg-light text-dark p-5">
-					<div class="container">
-						<h2 class="text-center mb-4">Our Impact</h2>
-						<p class="text-center">
-							With <strong>31 Solar Systems</strong> installed across <strong>19 Schools</strong>, 
-							we're lighting the way for a sustainable educational future in Belize. 
-							Our hands-on projects engage students and communities, turning optimism into tangible outcomes.
-						</p>		
-					</div>
-				</div>
-				<!-- Join Our Journey Section -->
-				<div class="bg-primary text-light p-5">
-					<div class="container">
-						<h2 class="text-center mb-4">Join Our Journey</h2>
-						<p class="text-center">
-							Discover how we're making a difference with optimism, innovation, and community partnership. 
-							Explore our project's impact, our dedicated team, and how you can be a part of this transformative journey.
-						</p>
-					</div>
-				</div>
-				<!-- Cards Section -->
-				<div class="bg-light text-dark p-5">
-					<div class="container">
-						<div class="row text-center">
-							<!-- Solar Overview Card -->
-							<div class="col-md-4 mb-4">
-								<div class="card bg-secondary text-light">
-									<div class="card-body">
-										<h3 class="card-title">Solar Overview</h3>
-										<p class="card-text">Learn about our solar installations and their impact on schools.</p>
-										<a data-target="solarOverviewContent" href="#" class="btn btn-warning">Explore</a>
+							<p class="text-center">
+								Visit our school pages to see how solar energy is being captured and used in real time!
+							</p>
+							<!-- School Page Accordian -->
+							<div class="accordion" id="schoolsAccordion">
+								<div class="accordion-item">
+									<h2 class="accordion-header" id="headingSchools">
+										<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSchools" aria-expanded="false" aria-controls="collapseSchools">
+											Schools
+										</button>
+									</h2>
+									<div id="collapseSchools" class="accordion-collapse collapse" aria-labelledby="headingSchools" data-bs-parent="#schoolsAccordion">
+										<div class="accordion-body">
+											<!-- School Links Will Be Populated Here -->
+											<ul class="list-group">
+												<!-- Populated by populateAccordion() -->
+											</ul>
+										</div>
 									</div>
 								</div>
-							</div>
-							<!-- Interactive Map Card -->
-							<div class="col-md-4 mb-4">
-								<div class="card bg-secondary text-light">
-									<div class="card-body">
-										<h3 class="card-title">Interactive Map</h3>
-										<p class="card-text">View the locations of our solar-powered schools across Belize.</p>
-										<a href="#" data-target="interactiveMapContent" class="btn btn-warning">View Map</a>
+							</div>		
+						</div>
+					</div>
+					<!-- Other Information Section -->
+					<div class="bg-primary text-light p-5">
+						<div class="container">
+							<h2 class="text-center mb-4">Learn About the Project</h2>
+							<p class="text-center">
+								Discover how we're making a difference with optimism, innovation, and community partnership. 
+								Explore our project's impact and how you can be a part of this journey.
+							</p>
+							<!-- Cards Section -->
+							<div class="container">
+								<div class="row text-center">
+									<!-- Solar Overview Card -->
+									<div class="col-md-4 mb-4">
+										<div class="card bg-secondary text-light">
+											<div class="card-body">
+												<h3 class="card-title">Solar Overview</h3>
+												<p class="card-text">Learn about our solar installations and their impact on schools.</p>
+												<a data-target="solarOverviewContent" href="#" class="btn btn-warning">Explore</a>
+											</div>
+										</div>
 									</div>
-								</div>
-							</div>
-							<!-- Learn More Card -->
-							<div class="col-md-4 mb-4">
-								<div class="card bg-secondary text-light">
-									<div class="card-body">
-										<h3 class="card-title">Learn More</h3>
-										<p class="card-text">Deep dive into the technology and stories behind the project.</p>
-										<a href="#" data-target="learnMoreContent" class="btn btn-warning">Learn More</a>
+									<!-- Interactive Map Card -->
+									<div class="col-md-4 mb-4">
+										<div class="card bg-secondary text-light">
+											<div class="card-body">
+												<h3 class="card-title">Solar Map</h3>
+												<p class="card-text">View the locations of our solar-powered schools across Belize.</p>
+												<a href="#" data-target="solarMapContent" class="btn btn-warning">View Map</a>
+											</div>
+										</div>
+									</div>
+									<!-- Learn More Card -->
+									<div class="col-md-4 mb-4">
+										<div class="card bg-secondary text-light">
+											<div class="card-body">
+												<h3 class="card-title">Learn More</h3>
+												<p class="card-text">Deep dive into the technology and stories behind the project.</p>
+												<a href="#" data-target="learnMoreContent" class="btn btn-warning">Learn More</a>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
+					<!-- End Main Content -->
 				</div>
-				
-				<!-- Accordian Structure -->
-				<div class="accordion" id="schoolsAccordion">
-					<div class="accordion-item">
-						<h2 class="accordion-header" id="headingSchools">
-							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSchools" aria-expanded="false" aria-controls="collapseSchools">
-								Schools
-							</button>
-						</h2>
-						<div id="collapseSchools" class="accordion-collapse collapse" aria-labelledby="headingSchools" data-bs-parent="#schoolsAccordion">
-							<div class="accordion-body">
-								<!-- School Links Will Be Populated Here -->
-								<ul class="list-group">
-									<!-- Populated by populateAccordion() -->
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- Solar Power Installation Section -->
-				<div class="bg-white p-5">
-				  <div class="container">
-					<div class="row align-items-center">
-					  <!-- Image Column -->
-					  <div class="col-lg-6 mb-4 mb-lg-0">
-						<img src="Images/SolarPowerForSchools.jpg" alt="Solar Panel Installation" class="img-fluid rounded" style="max-width: 80%; height: auto;">>
-					  </div>
-	  
-					  <!-- Text Column -->
-					  <div class="col-lg-6">
-						<h2 class="mb-4">Powering Education with Solar Energy</h2>
-						<p class="lead">
-						  Our initiative focuses on harnessing solar energy to provide a sustainable power source for schools. By equipping educational institutions with solar panels, we're not only reducing the carbon footprint but also ensuring consistent electricity in remote areas, thus empowering students to study without interruption.
-						</p>
-						<p>
-						  The impact extends beyond illumination, as students learn about renewable energy and its significance in the modern world, fostering a new generation of eco-conscious individuals.
-						</p>
-					  </div>
-					</div>
-				  </div>
-				</div>
-
-
+				<!-- End Home Content -->
 			</div>
 	
 			<!-- Solar Overview Content (initially hidden) -->
@@ -209,19 +216,156 @@
 				</div>
 			</div>
 
-			<!-- Interactive Map Content (initially hidden) -->
-			<div id="interactiveMapContent" class="content-section hidden">
-				<h2>Interactive Map</h2>
-				<p>Interactive map showing the location of schools and solar installations.</p>
-				<!-- Interactive map goes here -->
+			<!-- Map Content (initially hidden) -->
+			<div id="solarMapContent" class="content-section hidden">
+				<div class="map-container">
+					<div class="map-info">
+						<h2>Solar Map</h2>
+						<p>Interactive map showing the location of schools and solar installations.</p>
+					</div>
+					<div class="map-image-container">
+						<img src="Images/SolarMap.png" alt="Belize Solar Map" class="img-fluid">
+					</div>
+				</div>
 			</div>
+
 
 			<!-- Learn More Content (initially hidden) -->
 			<div id="learnMoreContent" class="content-section hidden">
-				<h2>Learn More</h2>
-				<p>Resources and information for deeper understanding of solar energy.</p>
-				<!-- Additional resources and information goes here -->
+				
+				<!-- Our Story Section -->
+				<section class="bg-secondary text-light p-5 text-center text-sm-start">
+					<div class="container">
+						<h1>Our Story</h1>
+						<p class="lead">
+							The Belize Solar Project began with a vision in 1986 to engage students in meaningful 
+							service learning projects abroad. James Skon, PhD, propelled by the idea that technology 
+							and education could converge to make a significant impact, led the first group of students 
+							to Belize in 2014. Since then, our projects have not only illuminated classrooms but also 
+							ignited a passion for renewable energy and community service among participants.
+						</p>
+					</div>
+				</section>
+
+				<!-- Why Solar Section -->
+				<section class="bg-primary text-light p-5 text-center text-sm-start">
+					<div class="container">
+						<h1>Why Solar?</h1>
+						<p class="lead">
+							In Belize, the high cost of electricity limits the use of essential educational tools like 
+							computers. Solar energy, abundant and renewable, presented an affordable solution. 
+							Our grid-tie systems augment existing electricity, reducing costs and promoting sustainability.
+						</p>
+					</div>
+				</section>
+	
+				<!-- Approach Carousel -->
+				<section class="bg-secondary text-light p-5 text-center text-sm-start">
+					<div class="container">
+						<div id="approachCarousel" class="carousel slide" data-bs-ride="carousel">
+							<div class="carousel-indicators">
+								<button type="button" data-bs-target="#approachCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+								<button type="button" data-bs-target="#approachCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+								<button type="button" data-bs-target="#approachCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+							</div>
+							<div class="carousel-inner">
+								<!-- Student-Centric Projects Slide -->
+								<div class="carousel-item active">
+									<img src="Images/schoolExample.jpeg" class="d-block w-100" alt="Student-Centric Projects">
+									<div class="carousel-caption d-none d-md-block">
+										<h5>Student-Centric Projects</h5>
+										<p>From initial research to installation, students are at the heart of our projects, gaining invaluable hands-on experience.</p>
+									</div>
+								</div>
+								<!-- Collaboration Slide -->
+								<div class="carousel-item">
+									<img src="Images/schoolExample.jpeg" class="d-block w-100" alt="Collaboration">
+									<div class="carousel-caption d-none d-md-block">
+										<h5>Collaboration</h5>
+										<p>Success stems from strong partnerships with local educators, government officials, and international volunteers.</p>
+									</div>
+								</div>
+								<!-- Sustainability Slide -->
+								<div class="carousel-item">
+									<img src="Images/schoolExample.jpeg" class="d-block w-100" alt="Sustainability">
+									<div class="carousel-caption d-none d-md-block">
+										<h5>Sustainability</h5>
+										<p>By focusing on grid-tie systems, we ensure that our installations provide long-term value and are integrated with the schools' existing infrastructure.</p>
+									</div>
+								</div>
+							</div>
+							<button class="carousel-control-prev" type="button" data-bs-target="#approachCarousel" data-bs-slide="prev">
+								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+								<span class="visually-hidden">Previous</span>
+							</button>
+							<button class="carousel-control-next" type="button" data-bs-target="#approachCarousel" data-bs-slide="next">
+								<span class="carousel-control-next-icon" aria-hidden="true"></span>
+								<span class="visually-hidden">Next</span>
+							</button>
+						</div>
+					</div>
+				</section>
+				
+				<!-- Impact and Success Carousel -->
+				<section class="bg-secondary text-light p-5 text-center text-sm-start">
+					<div class="container">
+						<div id="impactCarousel" class="carousel slide" data-bs-ride="carousel">
+							<div class="carousel-indicators">
+								<button type="button" data-bs-target="#impactCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+								<button type="button" data-bs-target="#impactCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+								<button type="button" data-bs-target="#impactCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+							</div>
+							<div class="carousel-inner">
+								<!-- Significant Savings Slide -->
+								<div class="carousel-item active">
+									<img src="Images/schoolExample.jpeg" class="d-block w-100" alt="Significant Savings">
+									<div class="carousel-caption d-none d-md-block">
+										<h5>Significant Savings</h5>
+										<p>Schools report saving between $75 to $150 USD per month, funds that can be redirected to essential educational resources.</p>
+									</div>
+								</div>
+								<!-- Broad Reach Slide -->
+								<div class="carousel-item">
+									<img src="Images/schoolExample.jpeg" class="d-block w-100" alt="Broad Reach">
+									<div class="carousel-caption d-none d-md-block">
+										<h5>Broad Reach</h5>
+										<p>From Victorious Believers Primary to San Pedro High School, our systems span across Belize, each telling a story of empowerment and resilience.</p>
+									</div>
+								</div>
+								<!-- Future Leaders Slide -->
+								<div class="carousel-item">
+									<img src="Images/schoolExample.jpeg" class="d-block w-100" alt="Future Leaders">
+									<div class="carousel-caption d-none d-md-block">
+										<h5>Future Leaders</h5>
+										<p>Students involved in the project return with a deeper understanding of sustainable development, teamwork, and the global community.</p>
+									</div>
+								</div>
+							</div>
+							<button class="carousel-control-prev" type="button" data-bs-target="#impactCarousel" data-bs-slide="prev">
+								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+								<span class="visually-hidden">Previous</span>
+							</button>
+							<button class="carousel-control-next" type="button" data-bs-target="#impactCarousel" data-bs-slide="next">
+								<span class="carousel-control-next-icon" aria-hidden="true"></span>
+								<span class="visually-hidden">Next</span>
+							</button>
+						</div>
+					</div>
+				</section>
+				
+				<!-- Get Involved Section -->
+				<section class="bg-primary text-light p-5 text-center text-sm-start">
+					<div class="container">
+						<h1>Get Involved</h1>
+						<p class="lead">
+							Whether you're interested in volunteering, leading a project, or supporting our mission, there are many ways 
+							to contribute to the Belize Solar Project. Contact us to learn how you can make a difference.
+						</p>
+					</div>
+				</section>
+				
 			</div>
+
 
 			<!-- School Content (initially hidden) -->
 			<div id="siteContentContainer" class="content-section hidden">
