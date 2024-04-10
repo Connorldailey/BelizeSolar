@@ -115,6 +115,39 @@ document.addEventListener('DOMContentLoaded', () => {
     showContentSectionById('homeContent'); // Show the home content by default
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    // Select the navbar toggler button
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navbarCollapse = document.getElementById('navbarSupportedContent');
+
+    // Function to explicitly collapse the navbar
+    function collapseNavbar() {
+        if (navbarCollapse.classList.contains('show')) {
+            navbarToggler.click(); // Trigger the navbar toggler button click to collapse
+        }
+    }
+
+    // Add click event listener to all nav links to collapse the navbar, excluding those that toggle dropdowns
+    document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)').forEach(function (element) {
+        element.addEventListener('click', function () {
+            // Check if the window's width is less than or equal to 768px.
+            if (window.innerWidth <= 768) {
+                collapseNavbar(); // Collapse the navbar
+            }
+        });
+    });
+
+    // Specifically target dropdown items
+    document.querySelectorAll('.navbar-nav .dropdown-menu a').forEach(function (dropdownItem) {
+        dropdownItem.addEventListener('click', function () {
+            // Collapse the navbar when a dropdown item is clicked
+            if (window.innerWidth <= 768) {
+                collapseNavbar(); // This should now properly collapse the navbar
+            }
+        });
+    });
+});
+
 // Initialize the date picker and attach the event listener to it
 const initializeDatePicker = () => {
     const datePicker = document.getElementById('wattHoursDate');
@@ -251,7 +284,7 @@ function displaySitePhotoSection(siteName) {
 
     // Clear previous content
     container.innerHTML = '';
-
+	
     // Create the div that will hold the school name and image
     const sitePhotoDiv = document.createElement('div');
     sitePhotoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
