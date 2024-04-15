@@ -224,6 +224,38 @@ body {
     background-color: #343a40; /* Dark background for the dropdown */
 }
 
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: #333;  // Change the background color to something that fits your theme better
+    border-radius: 50%;
+    width: 45px;  // Increase the size for better visibility
+    height: 45px;
+    padding: 10px;
+    box-shadow: 0 0 10px #666;  // Optional: adds a subtle shadow for a sleek look
+}
+
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+    background-color: #555;  // Slightly darker on hover for a tactile feel
+}
+
+.carousel-caption {
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.carousel-item.active .carousel-caption {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.carousel-control-prev:focus,
+.carousel-control-next:focus,
+.carousel-indicators > button:focus {
+    outline: 2px solid #aaa;  // Makes it easier to see which element is focused
+    outline-offset: 2px;
+}
 
 
 
