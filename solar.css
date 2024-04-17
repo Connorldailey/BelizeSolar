@@ -1,14 +1,17 @@
 html, body {
-    height: 100%; /* Make sure the HTML and body are full height */
-    margin: 0; /* Reset default margin */
-    padding: 0; /* Reset default padding */
+    height: 100%;  /* Make sure the entire HTML and body are full height */
+    margin: 0;      /* Reset default margin */
+    padding: 0;     /* Reset default padding */
     display: flex;
-    flex-direction: column;
-    scroll-behavior: smooth;
+    flex-direction: column; /* Ensures everything is aligned vertically from top to bottom */
 }
 
 body {
-    min-height: 100vh; /* Make sure the body takes up 100% of the viewport */
+    flex: 1;        /* Ensures body element takes up all available space pushing footer down */
+    display: flex;
+    flex-direction: column; /* Again, aligns child elements in a vertical column */
+    min-height: 100vh; /* Minimum height of viewport to push footer to bottom on short pages */
+    overflow-x: hidden; /* Prevents horizontal overflow */
 }
 
 .jumbotron {
@@ -135,30 +138,10 @@ body {
     margin: auto;
 }
 
-.map-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh; /* Use the viewport height to size the container */
-    justify-content: space-between; /* This will place content at top and bottom of the container */
-}
-
-.map-info {
-    text-align: center; /* Centers the text for smaller devices */
-    padding: 10px;
-}
-
-.map-image-container {
-    flex: 1; /* This allows the image container to fill the remaining space */
-    display: flex;
-    align-items: center; /* Centers the image vertically */
-    justify-content: center; /* Centers the image horizontally */
-    padding: 10px;
-}
-
 .img-fluid {
-    max-width: 100%; /* Ensures the image is never wider than its container */
-    max-height: 75vh; /* Limits the image height to 75% of the viewport height */
-    object-fit: contain; /* Ensures the image maintains its aspect ratio without being cropped */
+    width: 85%; /* Ensures the image is as wide as its container */
+    border-radius: 5px;
+    object-fit: contain; /* Maintain aspect ratio without cropping */
 }
 
 /* Hero Section */
@@ -308,7 +291,6 @@ body {
 .bg-mediumDark {
 	background-color: rgba(52, 58, 64, 0.85);
 }
-
 
 
 

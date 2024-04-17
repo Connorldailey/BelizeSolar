@@ -83,24 +83,24 @@ const showContentSectionById = (sectionId) => {
 // Function to update the active status of navigation links
 const updateActiveNavLink = (activeLink) => {
     // Remove 'active' class and underline from all nav links
-    document.querySelectorAll('nav .nav-link').forEach(navLink => {
+    document.querySelectorAll('nav .nav-link, nav .dropdown-item').forEach(navLink => {
         navLink.classList.remove('active');
-        navLink.style.borderBottom = 'none'; // Remove the underline style
+        navLink.style.borderBottom = 'none';  // Clear any underlines
     });
 
-    // Add 'active' class and underline to the clicked nav link
-    activeLink.classList.add('active');
-    activeLink.style.borderBottom = '3px solid white'; // Add the underline style
-
-    // Check if the active link is a dropdown item
+    // Manage the dropdown separately
+    const dropdownParent = document.querySelector('.dropdown-toggle');
     if (activeLink.closest('.dropdown-menu')) {
-        let dropdownParent = activeLink.closest('.nav-item.dropdown').querySelector('.nav-link.dropdown-toggle');
         dropdownParent.classList.add('active');
-        dropdownParent.style.borderBottom = '3px solid white'; // Underline the dropdown parent
-    } else if (activeLink.classList.contains('dropdown-toggle')) {
-        // If the dropdown itself is clicked and not one of its children
-        activeLink.style.borderBottom = '3px solid white'; // Underline the dropdown
+        dropdownParent.style.borderBottom = '3px solid white';  // Underline the dropdown
+    } else {
+        dropdownParent.classList.remove('active');
+        dropdownParent.style.borderBottom = 'none';  // No underline for dropdown if not active
     }
+
+    // Set the active class and underline for the current active link
+    activeLink.classList.add('active');
+    activeLink.style.borderBottom = '3px solid white';
 };
 
 // Attach event listeners to navigation links
@@ -241,7 +241,7 @@ function processSites() {
 function populateDropdown() {
     processSites().then(processedSites => {
         const dropdownMenu = document.querySelector('#navbarDropdown + .dropdown-menu');
-        // Clear existing dropdown items
+        // Clear existing dropdown items 
         dropdownMenu.innerHTML = '';
         // Iterate over the sites and create a dropdown item for each
         processedSites.forEach(site => {
@@ -255,7 +255,8 @@ function populateDropdown() {
                 event.preventDefault(); // Prevent default anchor action
                 // Here, you can call a function to change the page content based on the site clicked
                 console.log(`Site clicked: ${site}`);
-                loadSiteInfo(site);
+                loadSiteInfo(site); // Display content for site
+                updateActiveNavLink(link); // Update active link
             });
 
             listItem.appendChild(link);
