@@ -80,21 +80,43 @@ const showContentSectionById = (sectionId) => {
     }
 };
 
+// Function to update the active status of navigation links
+const updateActiveNavLink = (activeLink) => {
+    // Remove 'active' class and underline from all nav links
+    document.querySelectorAll('nav .nav-link').forEach(navLink => {
+        navLink.classList.remove('active');
+        navLink.style.borderBottom = 'none'; // Remove the underline style
+    });
+
+    // Add 'active' class and underline to the clicked nav link
+    activeLink.classList.add('active');
+    activeLink.style.borderBottom = '3px solid white'; // Add the underline style
+
+    // Check if the active link is a dropdown item
+    if (activeLink.closest('.dropdown-menu')) {
+        let dropdownParent = activeLink.closest('.nav-item.dropdown').querySelector('.nav-link.dropdown-toggle');
+        dropdownParent.classList.add('active');
+        dropdownParent.style.borderBottom = '3px solid white'; // Underline the dropdown parent
+    } else if (activeLink.classList.contains('dropdown-toggle')) {
+        // If the dropdown itself is clicked and not one of its children
+        activeLink.style.borderBottom = '3px solid white'; // Underline the dropdown
+    }
+};
+
 // Attach event listeners to navigation links
 document.querySelectorAll('nav .nav-link').forEach(link => {
     link.addEventListener('click', (event) => {
-    	// Retrieve the 'data-target' attribute to identify the target section
         const targetId = link.getAttribute('data-target');
         if (targetId) {
             event.preventDefault(); // Prevent default link behavior
             showContentSectionById(targetId); // Show the targeted content section
-            
-            // Update navigation link active status
-            document.querySelectorAll('nav .nav-link').forEach(navLink => navLink.classList.remove('active'));
-            link.classList.add('active');
+            updateActiveNavLink(link); // Update the active link status
         }
     });
 });
+
+// Initialize the active nav link on page load
+updateActiveNavLink(document.querySelector('nav .nav-link[data-target="homeContent"]')); // Assuming Home is the default active
 
 // Attach event listeners to card buttons
 document.querySelectorAll('.card .btn').forEach(button => {

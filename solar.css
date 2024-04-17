@@ -16,7 +16,16 @@ body {
 }
 
 .navbar {
-    min-height: 8vh; /* Set the navbar to take up 10% of the viewport height */
+    min-height: 8vh;
+    position: sticky !important; /* or use 'fixed' if you want it to be always at the top */
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+}
+
+/* Style for the active nav-link */
+.navbar .nav-link.active {
+    border-bottom: 3px solid white;
 }
 
 .navbar .nav-link {
@@ -28,6 +37,40 @@ body {
     font-size: 1.5rem !important; /* Adjust the font size */
     padding: 0.5rem 0; /* Adjust top/bottom padding */
     padding-left: 1rem; /* Adjust left padding */
+}
+
+.navbar-dark .navbar-nav .dropdown-menu a {
+    color: white;
+}
+
+.navbar-dark .navbar-nav .dropdown-menu {
+    background-color: #343a40; 
+}
+
+.navbar-dark .navbar-nav .dropdown-menu a:hover {
+    background-color: #495057; /* Slightly lighter shade for hover */
+}
+
+/* Ensures that the collapsed navbar has a higher z-index */
+.navbar-collapse.collapse.show {
+	padding-top: 10px;
+    z-index: 1050;
+    background-color: #343a40; /* Dark background for visibility */
+    border-radius: 15px;
+}
+
+/* Specificity for overriding default Bootstrap styles */
+.navbar-dark .navbar-collapse .navbar-nav .nav-link {
+    color: #ffffff; /* White text for visibility */
+}
+
+.navbar-dark .navbar-collapse .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-collapse .navbar-nav .nav-link:focus {
+    color: #f8f9fa; /* Slightly lighter shade of white for hover/focus */
+}
+
+.navbar-dark .navbar-collapse .navbar-nav .dropdown-menu {
+    background-color: #343a40; /* Dark background for the dropdown */
 }
 
 .sitePhotoContainer {
@@ -150,6 +193,7 @@ body {
   margin-bottom: 0;
 }
 
+
 .loading-spinner {
   display: flex;
   justify-content: center;
@@ -192,38 +236,6 @@ body {
     }
 }
 
-.navbar-dark .navbar-nav .dropdown-menu a {
-    color: white;
-}
-
-.navbar-dark .navbar-nav .dropdown-menu {
-    background-color: #343a40; /* Adjust this color to match your design */
-}
-
-.navbar-dark .navbar-nav .dropdown-menu a:hover {
-    background-color: #495057; /* Slightly lighter shade for hover */
-}
-
-/* Ensures that the collapsed navbar has a higher z-index */
-.navbar-collapse.collapse.show {
-    z-index: 1050;
-    background-color: #343a40; /* Dark background for visibility */
-}
-
-/* Specificity for overriding default Bootstrap styles */
-.navbar-dark .navbar-collapse .navbar-nav .nav-link {
-    color: #ffffff; /* White text for visibility */
-}
-
-.navbar-dark .navbar-collapse .navbar-nav .nav-link:hover,
-.navbar-dark .navbar-collapse .navbar-nav .nav-link:focus {
-    color: #f8f9fa; /* Slightly lighter shade of white for hover/focus */
-}
-
-.navbar-dark .navbar-collapse .navbar-nav .dropdown-menu {
-    background-color: #343a40; /* Dark background for the dropdown */
-}
-
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
     background-color: #333;  // Change the background color to something that fits your theme better
@@ -256,6 +268,49 @@ body {
     outline: 2px solid #aaa;  // Makes it easier to see which element is focused
     outline-offset: 2px;
 }
+
+.card {
+    transition: all 0.3s ease-in-out;  /* Smooth transition for all card elements */
+    cursor: pointer;  /* Indicates that the card is clickable */
+    border: 1px solid #f8f9fa !important;
+    background: linear-gradient(to right, #343a40, #495057);
+}
+
+.card:hover {
+    transform: translateY(-5px);  /* Slightly raises the card */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);  /* Adds a shadow for better 3D effect */
+}
+
+.card:hover .animate-icon {
+    transform: scale(1.1);  /* Makes the icon 10% larger */
+}
+
+.animate-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.content-module {
+	background-color: rgba(52, 58, 64, 0.85);
+	border-style: solid;
+  	border-color: #f8f9fa;
+  	border-width: 1px;
+  	transition: background-color 0.2s ease;
+  	transition: background-image 0.2s ease;
+  	transition: transform 0.2s ease-in-out;
+}
+
+.content-module:hover {
+	background-image: radial-gradient(circle, rgba(27, 108, 27, 0.4) 0%, transparent 100%);
+	background-color: rgba(52, 58, 64, 0.85);
+	transform: scale(1.01);
+}
+
+.bg-mediumDark {
+	background-color: rgba(52, 58, 64, 0.85);
+}
+
+
+
 
 
 
