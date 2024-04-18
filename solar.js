@@ -205,7 +205,7 @@ function todaysDate() {
 
 // Returns all site names (including system number)
 function fetchSites() {
-    return fetch(Url + Sites) // Ensure Url and Sites are correctly defined
+    return fetch(Url + Sites) 
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -230,7 +230,6 @@ function processSites() {
             const ref = sites[i].replace(/\d+\w*$/, '');
             if (!processedSites.includes(ref)) {
                 processedSites.push(ref);
-                //console.log(ref);
             }
         }
         return processedSites;
@@ -247,18 +246,17 @@ function populateDropdown() {
         processedSites.forEach(site => {
             const listItem = document.createElement('li');
             const link = document.createElement('a');
-            link.href = '#'; // Use real href if applicable
+            link.href = '#'; 
             link.textContent = site;
-            link.classList.add('dropdown-item'); // Add Bootstrap's dropdown-item class for styling
-            // Optional: Add a click event listener for each site
+            link.classList.add('dropdown-item'); 
+            // Add a click event listener for each site
             link.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent default anchor action
-                // Here, you can call a function to change the page content based on the site clicked
+                event.preventDefault(); 
+                // Change page content based on the site clicked
                 console.log(`Site clicked: ${site}`);
                 loadSiteInfo(site); // Display content for site
                 updateActiveNavLink(link); // Update active link
             });
-
             listItem.appendChild(link);
             dropdownMenu.appendChild(listItem);
         });
@@ -278,16 +276,15 @@ function populateAccordion() {
             const listItem = document.createElement('li');
             listItem.classList.add('list-group-item');
             const link = document.createElement('a');
-            link.href = '#'; // Use real href if applicable
+            link.href = '#'; 
             link.textContent = site;
-            link.classList.add('dropdown-item'); // Reuse the dropdown-item class or create a specific one for the accordion
+            link.classList.add('dropdown-item'); 
             // Add a click event listener for each school link
             link.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent default anchor action
-                // Call a function to change the page content based on the site clicked
-                loadSiteInfo(site); // Make sure this function exists and does what you expect
+                event.preventDefault(); 
+                // Change the page content based on the site clicked
+                loadSiteInfo(site); 
             });
-
             listItem.appendChild(link);
             accordionBody.appendChild(listItem);
         });
@@ -302,12 +299,12 @@ document.addEventListener('DOMContentLoaded', populateAccordion);
 
 // Displays the school name and picture section
 function displaySitePhotoSection(siteName) {
-    // Select the container where the site info will be displayed
+    
+    // Select the container where the site photo will be displayed
     const container = document.getElementById('sitePhotoContainer');
-
     // Clear previous content
     container.innerHTML = '';
-	
+    
     // Create the div that will hold the school name and image
     const sitePhotoDiv = document.createElement('div');
     sitePhotoDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
@@ -315,16 +312,17 @@ function displaySitePhotoSection(siteName) {
     sitePhotoDiv.style.flexDirection = 'column';
     sitePhotoDiv.style.justifyContent = 'center'; // Center content vertically
     sitePhotoDiv.style.height = '100%'; // Make sure the div uses the full height
-
+    
     // Create and append the school name element
     const schoolNameElement = document.createElement('h3');
     schoolNameElement.textContent = siteName;
     schoolNameElement.classList.add('text-center', 'mb-3');
     sitePhotoDiv.appendChild(schoolNameElement);
-
+    
     // Create and append the image element
     const imageElement = document.createElement('img');
-    let site = siteName.split(" ").join(""); // Remove spaces from site name
+    let site = siteName.replace(/\s+/g, ""); // Remove spaces from site name
+    // Set the link to the site image
     imageElement.src = 'http://3.15.139.27/BelizeSolar/Images/' + site + '.jpeg';
     imageElement.alt = 'Site Image';
     imageElement.classList.add('img-fluid', 'rounded', 'mx-auto', 'd-block');
@@ -332,35 +330,37 @@ function displaySitePhotoSection(siteName) {
     imageElement.style.objectFit = 'contain'; // Ensure aspect ratio is maintained
     sitePhotoDiv.appendChild(imageElement);
 
-    // Handle image loading errors
+    // Handle image loading errors by setting a default image
     imageElement.onerror = function() {
-        this.style.display = 'none'; // Hide the image if it fails to load
-        // Additional error handling can be implemented here
+        this.onerror = null; // Prevent potential future errors in case the default image also fails
+        this.src = 'http://3.15.139.27/BelizeSolar/Images/schoolExample.jpeg'; // Use a default image if the original fails to load
+        this.style.display = 'block'; // Ensure the image is displayed even if the default is used
     };
 
     // Append the site photo div to the container
     container.appendChild(sitePhotoDiv);
 }
 
-
 // Displays the watt gauge section
 function displayWattGaugeSection(siteName) {
+
+	// Select the container where the watt gauge will be displayed
     const container = document.getElementById('wattGaugeContainer');
     container.innerHTML = ''; // Clear any existing content
 
     // Create the div that will hold the watt gauge
-    const wattGuageDiv = document.createElement('div');
-    wattGuageDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
-    wattGuageDiv.style.position = 'relative'; // Relative positioning for JustGage
-    wattGuageDiv.style.height = '100%'; // Use 100% of parent's height
+    const wattGaugeDiv = document.createElement('div');
+    wattGaugeDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+    wattGaugeDiv.style.position = 'relative';
+    wattGaugeDiv.style.height = '100%';
 
     // Create and append the gauge element with an id that JustGage will use
     const gaugeElement = document.createElement('div');
     gaugeElement.id = 'gauge';
-    gaugeElement.style.width = '100%'; // Gauge width relative to its container
-    gaugeElement.style.height = '100%'; // Gauge height relative to its container
-    wattGuageDiv.appendChild(gaugeElement);
-    container.appendChild(wattGuageDiv);
+    gaugeElement.style.width = '100%'; 
+    gaugeElement.style.height = '100%';
+    wattGaugeDiv.appendChild(gaugeElement);
+    container.appendChild(wattGaugeDiv);
 
     // Fetch the total watts and then create the JustGage instance
     let gauge; // Hold the gauge instance for redrawing if needed
@@ -407,75 +407,85 @@ function fetchSystemIDs(siteName) {
                 // Directly match "Kings College" excluding "OLD Kings College"
                 if (siteName === "Kings College" && value === "Kings College") {
                     siteIDs.push(key);
-                    // console.log("Key:", key, "Value:", value); // Log the key for debugging
                 }
-                // Match any other site name including cases like "ACES Primary 1", "New Horizons Primary 1A", etc.
+                // Match any other site name 
                 else if (siteName !== "Kings College" && value.includes(siteName)) {
-                    siteIDs.push(key); // Add the key to siteIDs if the value includes siteName
-                    // console.log("Key:", key, "Value:", value); // Log the key for debugging
+                    siteIDs.push(key);
                 }
             }
-            //console.log(siteIDs);
             return siteIDs;
         });
 }
 
-// Returns current watts for site (sum of system watts)
-function fetchTotalWatts(siteName) {
-    // First, fetch the system IDs for the site
+// Returns a map containing the most recent watts for each system at a site
+function fetchSystemWatts(siteName) {
     return fetchSystemIDs(siteName).then(siteIDs => {
-        // Once we have the site IDs, fetch all watts
-        return fetch(Url + AllWatts)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json(); // Parse the JSON in the response
-            })
-            .then(data => {
-                let watts = 0;
-                data.message.forEach(entry => {
-                    const [key, valueStr] = entry; // Destructure the entry array to get key and value
-                    if (siteIDs.includes(key)) { // Only include if the key is in the siteIDs
-                        const value = parseInt(valueStr, 10); // Convert value string to number
-                        //console.log(`Adding ${value} watts from system ${key}`);
-                        watts += value; // Add to watts if key matches
+        let promises = siteIDs.map(ID => {
+            const MAC = shortMAC(ID);
+            const command = Url + siteDayWatts.replace("%SITE%", MAC).replace("%DATE%", todaysDate());
+            return fetch(command)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message.length > 0) {
+                        const lastEntry = data.message[data.message.length - 1];
+                        const [systemId, , , watts] = lastEntry;
+                        return {systemId: systemId, watts: parseInt(watts)};
+                    }
+                    return {systemId: ID, watts: 0}; // Default to 0 if no data
                 });
-                //console.log("Total: ", watts);
-                return watts; // Return the total watts for further processing
+        });
+
+        return Promise.all(promises).then(results => {
+            let systemWatts = new Map();
+            results.forEach(result => {
+                systemWatts.set(result.systemId, result.watts);
             });
+            return systemWatts;
+        });
     });
 }
 
-// Returns a map containing current watts for each system at a site
-function fetchSystemWatts(siteName) {
+// Function to fetch and sum the latest watts data for each system at a given site
+function fetchTotalWatts(siteName) {
     return fetchSystemIDs(siteName).then(siteIDs => {
-        return fetch(Url + AllWatts)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                let systemWatts = new Map();
-                data.message.forEach(entry => {
-                    const [key, valueStr] = entry;
-                    if (siteIDs.includes(key)) {
-                        const value = parseInt(valueStr, 10);
-                        systemWatts.set(key, value);
+        // Create a promise for each system ID to fetch the latest watts data
+        let promises = siteIDs.map(ID => {
+            const urlForWatts = Url + siteDayWatts.replace("%SITE%", shortMAC(ID)).replace("%DATE%", todaysDate());
+            // Fetch the latest data for each system ID
+            return fetch(urlForWatts)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok for ID ' + ID);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    // Extract the last entry which should be the most recent wattage reading
+                    if (data.message.length > 0) {
+                        const lastEntry = data.message[data.message.length - 1] || [null, null, null, "0"];
+                        const [systemId, , , watts] = lastEntry;
+                        return parseInt(watts, 10);
+                    }
+                    return 0;  // Default to 0 watts if no data is available
                 });
-                //console.log(systemWatts);
-                return systemWatts;
-            });
+        });
+        // Use Promise.all to wait for all fetch operations to complete
+        return Promise.all(promises).then(wattsArray => {
+            // Sum up all the watts data from each promise
+            const totalWatts = wattsArray.reduce((acc, watts) => acc + watts, 0);
+            return totalWatts;  // Return the total watts
+        });
     });
 }
 
 // Returns a map containing the number of panels for each system at a site
 function fetchNumPanels(siteName) {
-    // First, fetch all system IDs for the given site name
+    // Fetch all system IDs for the given site name
     return fetchSystemIDs(siteName).then(siteIDs => {
         // Map each ID to a promise that fetches the number of panels for that system
         let promises = siteIDs.map(ID => {
@@ -501,7 +511,6 @@ function fetchNumPanels(siteName) {
             results.forEach(result => {
                 panelsMap.set(result.id, result.numPanels);
             });
-            //console.log(panelsMap);
             return panelsMap; // Return the Map object
         });
     });
@@ -529,7 +538,6 @@ function fetchYearInstalled(siteName) {
 			results.forEach(result => {
 			 	instYearMap.set(result.id, result.yearInstalled);
 			});
-			// console.log(instYearMap);
 			return instYearMap;
 		})
 	})
@@ -557,7 +565,6 @@ function fetchLimiterStatus(siteName) {
 			results.forEach(result => {
 			 	limiterStatusMap.set(result.id, result.limiterStatus);
 			});
-			// console.log(limiterStatusMap);
 			return limiterStatusMap;
 		})
 	})
@@ -578,12 +585,11 @@ function fetchMaxDailyWatts(siteName) {
                     return response.json(); // Parse the JSON in the response
                 })
                 .then(data => {
-                    // Find the max watts value for this system and return it along with the ID
+                    // Find and return the max watts value for this system 
                     const maxWatts = Math.max(...data.message.map(entry => parseInt(entry[3], 10)));
                     return { id: entry, maxWatts };
                 });
         });
-
         // Use Promise.all to wait for all promises to resolve
         return Promise.all(promises).then(results => {
             // Create a Map to hold the system ID and max watts pairs
@@ -592,8 +598,6 @@ function fetchMaxDailyWatts(siteName) {
             results.forEach(result => {
                 maxWattsMap.set(result.id, result.maxWatts);
             });
-
-            // console.log(maxWattsMap); 
             return maxWattsMap; // Return the Map object
         });
     });
@@ -602,10 +606,8 @@ function fetchMaxDailyWatts(siteName) {
 // Returns an object containing general system information (location and contact info)
 function fetchSiteInfo(siteName) {
     return fetchSystemIDs(siteName).then(siteIDs => {
-        // Use map instead of forEach to return an array of promises
         let fetchPromises = siteIDs.map(ID => {
-            let MAC = shortMAC(ID);
-            let command = Url + siteInfo.replace("%SITE%", MAC);
+            let command = Url + siteInfo.replace("%SITE%", shortMAC(ID));
             return fetch(command)
                 .then(response => {
                     if (!response.ok) {
@@ -623,7 +625,6 @@ function fetchSiteInfo(siteName) {
                     };
                 });
         });
-
         // Use Promise.all to wait for all fetch operations to complete
         return Promise.all(fetchPromises).then(results => {
             // Aggregate the results into a single object
@@ -633,7 +634,6 @@ function fetchSiteInfo(siteName) {
                 contactPhone: results[0].contactPhone,
                 contactEmail: results[0].contactEmail,
             };
-            //console.log(siteInfo)
             return siteInfo;
         });
     });
@@ -641,6 +641,8 @@ function fetchSiteInfo(siteName) {
 
 // Display site info section
 function displaySiteInfoSection(siteName) {
+    
+    // Select the container where the site info section will be displayed
     const container = document.getElementById('siteInfoContainer');
     container.innerHTML = ''; // Clear existing content
     
@@ -727,47 +729,35 @@ function createInfoElement(label, text) {
 // Returns a map containing system ids, timeList, and wattList
 function fetchSiteDayWatts(siteName) {
     return fetchSystemIDs(siteName).then(siteIDs => {
-        let promises = siteIDs.map(entry => {
-            const MAC = shortMAC(entry);
-            let command = Url + siteDayWatts.replace("%SITE%", MAC).replace("%DATE%", todaysDate());
+        let promises = siteIDs.map(id => {
+            let command = Url + siteDayWatts.replace("%SITE%", shortMAC(id)).replace("%DATE%", todaysDate());
             return fetch(command)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`Failed to load data for system ${id}: Network response was not ok`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    let timeList = [];
-                    let wattList = [];
-                    data.message.forEach(entry => {
-                        // Parse the date and time string into a Date object
+                    let timeList = data.message.map(entry => {
                         const dateTime = new Date(entry[2]);
-                        // Format the time as "HH:MM"
-                        const formattedTime = dateTime.getHours().toString().padStart(2, '0') + ':' + 
-                                              dateTime.getMinutes().toString().padStart(2, '0');
-                        timeList.push(formattedTime);
-                        wattList.push(parseInt(entry[3], 10));
+                        return `${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
                     });
-                    return {id: entry, timeList, wattList};
+                    let wattList = data.message.map(entry => parseInt(entry[3], 10));
+                    return { id, timeList, wattList };
                 });
         });
-        // Use Promise.all to wait for all promises to resolve
+
         return Promise.all(promises).then(results => {
-            // Create a Map to hold the system ID and time/watt pairs
-            let dailyWattMap = new Map();
-            // Populate the Map with the ID as key and the time/watt pairs as value
-            results.forEach(result => {
-                dailyWattMap.set(result.id, { timeList: result.timeList, wattList: result.wattList });
-            });
-            //console.log(dailyWattMap)
-            return dailyWattMap; // Return the Map object
+            let dailyWattMap = new Map(results.map(result => [result.id, { timeList: result.timeList, wattList: result.wattList }]));
+            return dailyWattMap;
         });
     });
 }
 
 // Displays the daily watts line graph 
 function displayDailyWattsGraph(siteName) {
+
 	const root = document.getElementById('wattsTimeChartContainer');
     root.innerHTML = ''; // Clear existing content
 
@@ -783,12 +773,7 @@ function displayDailyWattsGraph(siteName) {
     // Allows it to grow and fill available space, adjusting to dynamic height
 
     // Create and insert a loading spinner
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'loading-spinner';
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner-border text-secondary';
-    spinner.setAttribute('role', 'status');
-    loadingDiv.appendChild(spinner);
+    const loadingDiv = createLoadingSpinner();
     chartBoxContainer.appendChild(loadingDiv);
 
     // Append the chartBoxContainer to the dailyWattsChartDiv
@@ -902,145 +887,85 @@ function getLastSevenDays() {
 		let formattedDate = date.toISOString().split('T')[0];
 		dates.push(formattedDate);
 	}
-	//console.log(dates)
 	return dates;
 }
 
 // Returns a map containing watt hours for the last 7 days 
 function fetchWattHoursForWeek(siteName) {
-    let days = getLastSevenDays(); // Assuming this function returns an array of date strings for the last 7 days.
+    let days = getLastSevenDays();
     let dayTotalsPromises = days.map(day => fetchSiteDailyWattHours(siteName, day)
-        .catch(() => 0) // Consider how to handle errors; here, we assume 0 watt-hours for error days.
+        .catch(() => 0) 
     );
-
     return Promise.all(dayTotalsPromises).then(dayTotals => {
         // Construct a map of day to total watt-hours
         let weekHistory = new Map(days.map((day, index) => [day, dayTotals[index]]));
-        //console.log(weekHistory);
         return weekHistory;
     });
 }
 
-// Returns an array containing the last twelve months in yyyy-mm format
-function getLastTwelveMonths() {
-    let months = [];
-    for (let i = 11; i >= 0; i--) {
-        let date = new Date();
-        date.setMonth(date.getMonth() - i);
-        let year = date.getFullYear();
-        let month = (date.getMonth() + 1).toString().padStart(2, '0'); // +1 because getMonth() is 0-indexed
-        months.push(`${year}-${month}`);
-    }
-    return months;
-}
-
-// Returns an array containing the days of the given month
-function getDaysOfMonth(yearMonth) {
-    let daysOfMonth = [];
-
-    // Separate year and month
-    const [year, month] = yearMonth.split('-').map(part => parseInt(part, 10));
-
-    // Create a date object pointing to the first day of the given month
-    let date = new Date(year, month - 1, 1);
-
-    // Loop until the month changes
-    while (date.getMonth() === month - 1) {
-        // Format the date in "YYYY-MM-DD" format
-        const formattedDate = date.toISOString().split('T')[0];
-        daysOfMonth.push(formattedDate);
-
-        // Move to the next day
-        date.setDate(date.getDate() + 1);
-    }
-
-    //console.log(daysOfMonth);
-    return daysOfMonth;
-}
-
 // Returns the watt hours for a system on the given date
 function fetchSystemDailyWattHours(shortMAC, date) {
-    let command = Url + siteDayWatts.replace("%SITE%", shortMAC).replace("%DATE%", date);
+    const command = `${Url + siteDayWatts.replace("%SITE%", shortMAC).replace("%DATE%", date)}`;
     return fetch(command)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok'); // Error handling for non-2xx responses
             }
             return response.json();
         })
         .then(data => {
-            let totalEnergy = 0; // Total energy in watt-hours
+            let totalEnergy = 0; // Initialize total energy accumulator in watt-hours
 
+            // Ensure there is more than one data point to calculate differences
             if (data.message.length > 1) {
+                // Loop through each entry except the last (no subsequent entry to compare with)
                 for (let i = 0; i < data.message.length - 1; i++) {
-                    const currentEntry = data.message[i];
-                    const nextEntry = data.message[i + 1];
+                    const [ , , currentTimeStr, currentWatts] = data.message[i];
+                    const [ , , nextTimeStr, ] = data.message[i + 1];
 
-                    // Convert timestamps to Date objects
-                    const currentTime = new Date(currentEntry[2]);
-                    const nextTime = new Date(nextEntry[2]);
+                    // Parse timestamps and convert to Date objects for time difference calculation
+                    const currentTime = new Date(currentTimeStr);
+                    const nextTime = new Date(nextTimeStr);
 
-                    // Calculate time difference in hours
-                    const timeDiffHours = (nextTime - currentTime) / (1000 * 60 * 60);
+                    // Calculate time difference in hours between consecutive readings
+                    const timeDiffHours = (nextTime - currentTime) / (1000 * 3600); // Milliseconds to hours
 
-                    // Calculate energy for the interval using the average of the two readings (if assuming linear consumption)
-                    // Or use just the current reading if assuming instantaneous consumption represented
-                    const watts = parseInt(currentEntry[3], 10);
-                    const energyForInterval = watts * timeDiffHours;
-
-                    totalEnergy += energyForInterval;
+                    // Assume linear power usage between readings and calculate energy
+                    const watts = parseInt(currentWatts, 10);
+                    const energyForInterval = watts * timeDiffHours; // Energy = Power * Time
+                    totalEnergy += energyForInterval; // Accumulate energy over the day
                 }
+            } else {
+                console.warn('Insufficient data for energy calculation: returning zero.');
             }
-
-            // Round to two decimal places
-            totalEnergy = parseFloat(totalEnergy.toFixed(2));
-            //console.log("Total Energy (Wh):", totalEnergy);
-            return totalEnergy;
+            // Output rounded to two decimal places
+            return parseFloat(totalEnergy.toFixed(2));
+        })
+        .catch(error => {
+            console.error('Error fetching daily watt hours:', error);
+            throw error; // Rethrow after logging to handle it further up the call chain
         });
 }
 
-// Returns the total watt site watt hours for a given day (sum of system watt hours)
+// Returns the total watt-hours for a site on a given day
 function fetchSiteDailyWattHours(siteName, date) {
     return fetchSystemIDs(siteName).then(siteIDs => {
+        // Map each system ID to a promise that resolves to its daily watt-hours
         let promises = siteIDs.map(ID => {
-            let MAC = shortMAC(ID);
-            return fetchSystemDailyWattHours(MAC, date);
+            return fetchSystemDailyWattHours(shortMAC(ID), date); // Fetch daily watt hours for each system
         });
-
+        // Wait for all promises to resolve, then calculate the total watt hours for the site
         return Promise.all(promises).then(entries => {
+            // Sum up all watt hours, initialized to 0
             let siteWattHours = entries.reduce((acc, entry) => acc + parseFloat(entry), 0);
-            siteWattHours = parseFloat(siteWattHours.toFixed(2)); // Ensure final value has two decimal places
-            //console.log("Total Watt Hours for Site on " + date + ": ", siteWattHours);
-            return siteWattHours;
+            // Round the result to two decimal places
+            siteWattHours = parseFloat(siteWattHours.toFixed(2));
+            // Return the total watt hours calculated for the site
+            return siteWattHours; 
         });
-    });
-}
-
-// Returns the total watt hours for the given month
-function fetchWattHoursForMonth(siteName, yearMonth) {
-    let promises = getDaysOfMonth(yearMonth).map(day => {
-        return fetchSiteDailyWattHours(siteName, day)
-            .catch(() => 0); // Handles errors by assuming 0 watt hours for that day, ensuring the rest of the days are still processed.
-    });
-    
-    return Promise.all(promises).then(entries => {
-        let monthlyWattHours = entries.reduce((acc, item) => acc + item, 0); // Removed unnecessary parseInt, assuming fetchSiteDailyWattHours returns a number.
-        //console.log("Month: ", yearMonth, "Watt Hours: ", monthlyWattHours.toFixed(2));
-        return parseFloat(monthlyWattHours.toFixed(2)); // Ensuring rounding here.
-    });
-}
-
-// Returns a map containing the total watt hours for each month in the last year
-function fetchWattHoursForYear(siteName) {
-    let months = getLastTwelveMonths();
-    
-    let promises = months.map(month => fetchWattHoursForMonth(siteName, month));
-    
-    return Promise.all(promises).then(monthlyWattHours => {
-        // Constructing a Map directly from month and watt hours array.
-        let monthlyWattHoursMap = new Map(months.map((month, i) => [month, monthlyWattHours[i]]));
-        console.log(monthlyWattHoursMap); // For debugging
-        return monthlyWattHoursMap;
+    }).catch(error => {
+        console.error(`Error calculating total watt hours for site ${siteName} on ${date}:`, error);
+        throw error; // Rethrow error to handle it further up the call chain if needed
     });
 }
 
@@ -1058,73 +983,82 @@ function formatDateWithDay(dateString) {
 }
 
 function displayWattHourWeekSummaryGraph(siteName) {
+	
     const graphContainer = document.getElementById('chartContainer');
-    // Clear existing content in the graph container
-    graphContainer.innerHTML = '';
+    graphContainer.innerHTML = '';  // Clear any previously displayed content
 
-    // Create and insert a loading spinner
+    // Create a loading spinner and display it while fetching data
+    const loadingDiv = createLoadingSpinner();
+    graphContainer.appendChild(loadingDiv);
+
+    // Fetch weekly watt hours data
+    fetchWattHoursForWeek(siteName)
+        .then(weeklyWattMap => {
+            graphContainer.removeChild(loadingDiv);  // Remove the loading spinner once data is fetched
+
+            // Prepare the data for the chart
+            const labels = Array.from(weeklyWattMap.keys()).reverse().map(formatDateWithDay);
+            const dataPoints = Array.from(weeklyWattMap.values()).reverse();
+
+            // Create a canvas for the chart and add it to the DOM
+            const canvas = document.createElement('canvas');
+            graphContainer.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            // Initialize the Chart.js bar chart
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Watt Hours',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Watt Hour Summary for Last Week'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Day'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Watt Hours'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error displaying watt hour week summary graph:', error);
+            graphContainer.innerHTML = '<p>Error loading data. Please try again later.</p>';
+        });
+}
+
+// Helper function to create a loading spinner
+function createLoadingSpinner() {
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'loading-spinner';
     const spinner = document.createElement('div');
     spinner.className = 'spinner-border text-secondary';
     spinner.setAttribute('role', 'status');
     loadingDiv.appendChild(spinner);
-    graphContainer.appendChild(loadingDiv);
-
-    // Fetch data for the chart
-    fetchWattHoursForWeek(siteName).then(weeklyWattMap => {
-        // Remove the loading spinner
-        graphContainer.removeChild(loadingDiv);
-
-        const labels = Array.from(weeklyWattMap.keys()).reverse().map(formatDateWithDay);
-        const dataPoints = Array.from(weeklyWattMap.values()).reverse();
-
-        const canvas = document.createElement('canvas');
-        graphContainer.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Watt Hours',
-                    data: dataPoints,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Watt Hour Summary for Last Week',
-                    }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Day',
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Watt Hours',
-                        }
-                    }
-                }
-            }
-        });
-    }).catch(error => {
-        console.error('Error displaying watt hour week summary graph:', error);
-        // Update the UI to show an error message instead of the spinner
-        graphContainer.innerHTML = '<p>Error loading data. Please try again later.</p>';
-    });
+    return loadingDiv;
 }
 
 // Sets up graph container with buttons and displays the weekly watt hour chart by default
@@ -1153,20 +1087,32 @@ function displayWattHourSummarySection(siteName) {
     displayWattHourWeekSummaryGraph(siteName);
 }
 
+/*
+	--------------------------------------------------------------------------------------
+	The code below is for the solar overview section. 
+	Pick back up here.
+	--------------------------------------------------------------------------------------
+*/
+
 // Returns a map containing live watts for each site
 function getLiveWattsBySchool() {
-	let liveWatts = new Map();
-	return processSites().then(processedSites => {
-		let promises = processedSites.map(site => {
-			return fetchTotalWatts(site).then(watts => {
-				liveWatts.set(site, watts);
-			});
-		});
-		return Promise.all(promises).then(() => {
-			//console.log(liveWatts);
-			return liveWatts;
-		});
-	});
+    let liveWatts = new Map(); // Create a map to hold the live watts by site
+    // Process sites and map each to its current live watts
+    return processSites().then(processedSites => {
+        let promises = processedSites.map(site => {
+            return fetchTotalWatts(site)
+                .then(watts => {
+                    liveWatts.set(site, watts); // Set the site's live watts in the map
+                })
+                .catch(error => {
+                    console.error(`Failed to fetch watts for ${site}:`, error);
+                    liveWatts.set(site, 0); // Set to 0 if there's an error fetching data
+                });
+        });
+        return Promise.all(promises).then(() => {
+            return liveWatts;
+        });
+    });
 }
 
 // Global flag to keep track of which sites to display
@@ -1205,12 +1151,7 @@ const displayLiveWattsBarGraph = () => {
         margin: auto;
     `;
 
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'loading-spinner';
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner-border text-secondary';
-    spinner.setAttribute('role', 'status');
-    loadingDiv.appendChild(spinner);
+    const loadingDiv = createLoadingSpinner();
     
     // Append the toggle button and loading spinner to the graph container
     graphContainer.appendChild(toggleButton);
