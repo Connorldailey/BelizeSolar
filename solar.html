@@ -21,7 +21,7 @@
 	</head>
 	
 	<!-- Begin Body -->
-	<body>
+	<body class="bg-dark text-light">
 		<!-- Nav Bar -->
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 			<div class="container-fluid">
@@ -200,43 +200,44 @@
 
 			<!-- Solar Overview Content (initially hidden) -->
 			<div id="solarOverviewContent" class="content-section hidden">
-				<div class="p-5 bg-dark text-light">
-					<h2>Solar Overview</h2>
-					<p>Information about solar energy and its impact in Belize.</p>
-					<div class="overview-flex-container">
+				<div class="bg-dark p-3 pb-0">
+					<div class="solar-overview-grid">
 						<!-- Live watts bar graph container -->
-						<div id="liveWattsChartContainer" class="chart-container">
-							<!-- Chart canvas or placeholder content -->
-						</div>
+						<div id="liveWattsChartContainer" class="solar-overview-chart"></div>
 						<!-- Date picker and watt hours chart container -->
-						<div id="wattHoursOverviewContainer" class="chart-container">
-							<div class="controls-container">
-								<div id="datePickerContainer" class="date-picker-container">
+						<div id="wattHoursOverviewContainer" class="solar-overview-chart">
+							<div class="solar-controls-container">
+								<div class="solar-date-picker-container">
 									<input type="date" id="wattHoursDate" name="wattHoursDate">
 								</div>
 								<button id="toggleWattHoursButton" class="btn btn-secondary">Show All Sites</button>
 							</div>
-							<div id="wattHoursChartOuterContainer" class="chart-outer-container">
+							<div id="wattHoursChartOuterContainer" class="solar-chart-outer-container">
 								<div id="wattHoursChartContainer">
 									<!-- Chart canvas will be dynamically inserted here -->
 								</div>
 							</div>
 						</div>
+						<!-- Container for the Statistics Table -->
+						<div id="statsTableContainer" class="solar-overview-full-width"></div>
 					</div>
 				</div>
 			</div>
+
 		
 			<!-- School Content (initially hidden) -->
 			<div id="siteContentContainer" class="content-section hidden">
-				<!-- School-specific content goes here -->
-				<div class="grid-container">
-					<!-- Top Grid -->
-					<div id="sitePhotoContainer" class="item photo"></div>
-					<div id="wattGaugeContainer" class="item gauge"></div>
-					<div id="siteInfoContainer" class="item info"></div>
-					<!-- Bottom Grid -->
-					<div id="wattsTimeChartContainer" class="item line"></div>
-					<div id="graphSection" class="item bar"></div>
+				<div class="p-3 bg-dark">
+					<!-- School-specific content goes here -->
+					<div class="grid-container pt-0 text-dark">
+						<!-- Top Grid -->
+						<div id="sitePhotoContainer" class="item photo"></div>
+						<div id="wattGaugeContainer" class="item gauge"></div>
+						<div id="siteInfoContainer" class="item info"></div>
+						<!-- Bottom Grid -->
+						<div id="wattsTimeChartContainer" class="item line"></div>
+						<div id="graphSection" class="item bar"></div>
+					</div>
 				</div>
 			</div>
 
@@ -254,19 +255,33 @@
 
 			<!-- Learn More Content (initially hidden) -->
 			<div id="learnMoreContent" class="content-section hidden">
-			
 				<!-- Our Story Section -->
 				<section class="bg-dark p-3 pb-0">
 					<div class="content-module text-light p-5 rounded">
 						<div class="container">
-							<h1>Our Story</h1>
-							<p class="lead">
-								The Belize Solar Project began with a vision in 1986 to engage students in meaningful 
-								service learning projects abroad. James Skon, PhD, propelled by the idea that technology 
-								and education could converge to make a significant impact, led the first group of students 
-								to Belize in 2014. Since then, our projects have not only illuminated classrooms but also 
-								ignited a passion for renewable energy and community service among participants.
-							</p>
+							<div class="row align-items-center">
+								<!-- Image Column -->
+								<div class="col-md-5 mb-4 mb-md-0">
+									<img src="Images/SolarInstallation.jpeg" alt="Solar Panel Installation" class="img-fluid rounded">
+								</div>
+								<!-- Text Column -->
+								<div class="col-md-7">
+									<h1>Our Story</h1>
+									<p class="lead">
+										Founded in 1986, the Belize Solar Project embodies a commitment to service learning, where students leverage technology for tangible impact. Since James Skon, PhD, led the inaugural group to Belize in 2014, we've been transforming educational spaces and fostering a culture of sustainability.
+									</p>
+									<p class="lead">
+										Addressing the critical need for energy independence in schools, our initiative has equipped 19 schools with 31 solar systems, turning a vision of accessible, sustainable energy into reality for students across Belize.
+									</p>
+									<p class="lead">
+										Through biannual trips, we conduct workshops that blend skill-building with passion, significantly reducing energy costs and nurturing a dedication to green practices among students.
+									</p>
+									<p class="lead">
+										A fusion of community effort and expert knowledge has birthed a replicable model of sustainable development. This practical education empowers students to craft and apply solutions for a greener tomorrow. Collectively, we are illuminating paths to knowledge with solar energy, one installation at a time.
+									</p>
+
+								</div>
+							</div>
 						</div>
 					</div>
 				</section>
@@ -275,12 +290,25 @@
 				<section class="bg-dark p-3 pb-0">
 					<div class="content-module text-light p-5 rounded">
 						<div class="container">
-							<h1>Why Solar?</h1>
-							<p class="lead">
-								In Belize, the high cost of electricity limits the use of essential educational tools like 
-								computers. Solar energy, abundant and renewable, presented an affordable solution. 
-								Our grid-tie systems augment existing electricity, reducing costs and promoting sustainability.
-							</p>
+							<div class="row align-items-center justify-content-center">
+								<!-- Text Column -->
+								<div class="col-md-6">
+									<h1>Why Solar?</h1>
+									<p class="lead">
+										In Belize, where the cost of traditional electricity forms a barrier to the consistent use of technology in education, solar energy emerges as a beacon of hope. Harnessing this inexhaustible resource, we bring sustainable and cost-effective power to schools, bridging the energy gap without ecological compromise.
+									</p>
+									<p class="lead">
+										Our solar initiatives alleviate the financial burden of energy expenses, allowing schools to reallocate funds to vital educational resources and programs. By integrating grid-tie solar systems, schools benefit from a dual-source energy model that not only ensures reliability but also fosters an environmentally conscious mindset among the youth.
+									</p>
+									<p class="lead">
+										Beyond the immediate benefits, the shift to solar represents a commitment to combating climate change. It empowers communities to contribute to a global movement towards renewable energy, setting a precedent for future generations to inherit a more sustainable and conscientious world.
+									</p>
+								</div>
+								<!-- Image Column -->
+								<div class="col-md-6 mb-4 mb-md-0 d-flex justify-content-center">
+									<img src="Images/AVision.jpeg" alt="A Vision of Solar Energy" class="img-fluid rounded" style="max-width: 100%; height: auto;">
+								</div>
+							</div>
 						</div>
 					</div>
 				</section>
@@ -289,7 +317,7 @@
 				<section class="bg-dark p-3 pb-0">
 					<div class="content-module text-light p-5 rounded">
 						<div class="container">
-							<div id="approachCarousel" class="carousel slide" data-bs-ride="carousel">
+							<div id="approachCarousel" class="carousel slide w-80" data-bs-ride="carousel">
 								<div class="carousel-indicators">
 									<button type="button" data-bs-target="#approachCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
 									<button type="button" data-bs-target="#approachCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -299,7 +327,7 @@
 									<!-- Student-Centric Projects Slide -->
 									<div class="carousel-item active">
 										<img src="Images/AVision.jpeg" class="d-block w-100" alt="A Vision">
-										<div class="carousel-caption d-none d-md-block">
+										<div class="carousel-caption d-none d-md-block text-background">
 											<h5>A Vision</h5>
 											<p>Engage students abroad in meaningful service learning projects. Create connections in culture, discipline, and humanity.</p>
 										</div>
@@ -307,7 +335,7 @@
 									<!-- Collaboration Slide -->
 									<div class="carousel-item">
 										<img src="Images/IdeaForSolar.jpeg" class="d-block w-100" alt="The Idea For Solar">
-										<div class="carousel-caption d-none d-md-block">
+										<div class="carousel-caption d-none d-md-block text-background">
 											<h5>The Idea For Solar</h5>
 											<p>"We can't afford the electricity to power our computers, so we don't use them".</p>
 										</div>
@@ -315,7 +343,7 @@
 									<!-- Sustainability Slide -->
 									<div class="carousel-item">
 										<img src="Images/OurSystems.jpeg" class="d-block w-100" alt="Our Systems">
-										<div class="carousel-caption d-none d-md-block">
+										<div class="carousel-caption d-none d-md-block text-background">
 											<h5>Our systems</h5>
 											<p>We have installed 31 systems on 19 schools</p>
 										</div>
@@ -333,7 +361,81 @@
 						</div>
 					</div>
 				</section>
-			
+				
+				<!-- Our Systems Section -->
+				<section class="bg-dark p-3 pb-0">
+					<div class="content-module text-light p-5 rounded">
+						<div class="container">
+							<h1>Our Systems</h1>
+							<p class="lead">
+								Our solar systems are meticulously engineered to harness the power of the sun efficiently. Here’s how they work:
+							</p>
+							<div class="row">
+								<!-- Solar Panels -->
+								<div class="col-md-6 col-lg-4 mb-4">
+									<h2>Solar Panels</h2>
+									<i class="fas fa-solar-panel fa-3x mb-3 animate-icon mb-4"></i>
+									<p>
+										We use high-efficiency photovoltaic panels that convert sunlight directly into electricity. 
+										This is the heart of our system, providing green energy even in the most remote locations.
+									</p>
+								</div>
+								<!-- Wiring -->
+								<div class="col-md-6 col-lg-4 mb-4">
+									<h2>Wiring</h2>
+									<i class="fas fa-bolt fa-3x mb-3 animate-icon mb-4"></i>
+									<p>
+										With UV-protected and weather-resistant wiring, our systems ensure maximum conductivity and minimal energy loss, 
+										connecting the solar arrays to the inverters reliably.
+									</p>
+								</div>
+								<!-- Limiters -->
+								<div class="col-md-6 col-lg-4 mb-4">
+									<h2>Limiters</h2>
+									<i class="fas fa-network-wired fa-3x mb-3"></i> 
+									<p>
+										Our systems include limiters to prevent backflow to the grid by detecting directions of current flow.
+										This ensures that only excess energy is returned, contributing to cost savings and energy efficiency.
+									</p>
+								</div>
+								<!-- Grid-Tie Systems -->
+								<div class="col-md-6 col-lg-4 mb-4">
+									<h2>Grid-Tie Systems</h2>
+									<i class="fas fa-plug fa-3x mb-3"></i>
+									<p>
+										We employ grid-tie systems that synchronize solar energy production with the local electricity grid. 
+										These systems allow for seamless integration and energy sharing.
+									</p>
+								</div>
+								<!-- Inverters -->
+								<div class="col-md-6 col-lg-4 mb-4">
+									<h2>Inverters</h2>
+									<i class="fas fa-exchange-alt fa-3x mb-3"></i>
+									<p>
+										Inverters are a critical bridge between the solar panels and the grid. 
+										They convert the direct current (DC) generated by the panels into the alternating current (AC) 
+										used in our homes and schools. 
+									</p>
+								</div>
+								<!-- Monitoring and Control Software -->
+								<div class="col-md-6 col-lg-4 mb-4">
+									<h2>Monitoring & Control</h2>
+									<i class="fas fa-desktop fa-3x mb-3"></i>
+									<p>
+										Our solar systems can be explored in detail using this web platform, enabling real-time monitoring. 
+										Schools can easily track their energy savings and environmental benefits through a user-friendly dashboard.
+									</p>
+								</div>
+							</div>
+							<p class="lead">
+								Each component of our system is selected for its durability, efficiency, and ability to contribute to a 
+								sustainable future. Our installations empower educational institutions with a reliable energy source that 
+								is both economically and environmentally sound.
+							</p>
+						</div>
+					</div>
+				</section>
+
 				<!-- Get Involved Section -->
 				<section class="bg-dark p-3">
 					<div class="content-module text-light p-5 rounded">
@@ -344,11 +446,52 @@
 								to contribute to the Belize Solar Project. Contact us to learn how you can make a difference.
 							</p>
 						</div>
-					</div>
-				</section>
-			</div>
-	
-		</div>
+						<!-- Contact Cards Section -->
+						<div class="container">
+							<div class="row text-center">
+								<!-- James Skon Card -->
+								<div class="col-md-4">
+									<div class="card bg-secondary text-light">
+										<div class="card-body">
+									  		<h3 class="card-title mb-3">James Skon, PhD</h3>
+									  		<img src="Images/JamesSkon.jpeg" class="d-block w-100 mb-3 rounded" alt="James Skon">
+									  		<p class="card-text">Professor of Computer Science at Kenyon College</p>
+									  		<p> skonjp@kenyon.edu </p>
+										</div>
+								 	 </div>
+								</div>
+								
+
+
+								<!-- Connor Dailey -->
+								<div class="col-md-4">
+									<div class="card bg-secondary text-light rounded">
+										<div class="card-body">
+											<h3 class="card-title mb-3">Connor Dailey</h3>
+											<img src="Images/ConnorDailey.jpeg" class="d-block w-100 mb-3 rounded" alt="Connor Dailey">
+											<p class="card-text">Student at Kenyon College</p>
+											<p> dailey2@kenyon.edu </p>
+										</div>
+									</div>
+								</div>
+
+								<!-- Doug Karl -->
+								<div class="col-md-4">
+									<div class="card bg-secondary text-light">
+										<div class="card-body">
+											<h3 class="card-title mb-3">Doug Karl</h3>
+											<img src="Images/DougKarl.jpeg" class="d-block w-100 mb-3 rounded" alt="Doug Karl">
+											<p class="card-text">Electrical Engineer and Computer Scientist</p>
+											<p> 614-571-5701 </p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div> <!-- End learn more content -->
+		
+		</div> <!-- End Jumbotron>
 
 		<!-- Bootstrap 5 JavaScript Bundle with Popper -->
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

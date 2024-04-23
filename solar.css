@@ -102,7 +102,6 @@ body {
     border-radius: 5px;
     background-color: #f8f9fa;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 20px;
     margin: auto;
     flex-basis: 48%; /* Gives each container a base width, but allows for some flexibility */
     max-width: 48%; /* Prevents containers from growing beyond this width */
@@ -176,7 +175,6 @@ body {
   margin-bottom: 0;
 }
 
-
 .loading-spinner {
   display: flex;
   justify-content: center;
@@ -190,11 +188,26 @@ body {
   display: inline-block;
 }
 
+.content-section {
+    padding: 0;
+    margin: 0;
+    background-color: #343a40;
+}
+
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* Divide into 4 equal columns for large screens */
-    grid-template-rows: auto; /* Auto-size rows based on content */
-    gap: 10px; /* Optional: adds space between grid items */
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    gap: 10px; /* Use gap instead of padding for space between grid items */
+    margin: 0 auto; /* Resets any default margin */
+    padding: 5px;
+    max-height: 90%;
+}
+
+.item {
+    /* Resets padding and margin for items, add back as needed */
+    padding: 0;
+    margin: 0;
 }
 
 /* For tablets */
@@ -292,6 +305,55 @@ body {
 	background-color: rgba(52, 58, 64, 0.85);
 }
 
+.solar-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 5px;
+}
+
+.solar-overview-chart {
+    padding: 10px;
+    background-color: #fff; /* Light background for contrast */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 300px; /* Sufficient height for chart visibility */
+}
+
+.solar-overview-full-width {
+    grid-column: 1 / -1; /* Make the stats table span full width */
+}
+
+.solar-controls-container {
+    display: flex;
+    flex-direction: row; /* Align items horizontally */
+    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between; /* Space out the elements */
+    flex-wrap: wrap; /* Allow items to wrap in smaller screens */
+    margin-bottom: 20px;
+}
+
+.solar-date-picker-container {
+    margin-bottom: 10px;
+}
+
+.solar-date-picker-container {
+    flex: 1; /* Allows both the date picker and the button to share the space equally */
+    min-width: 50%; /* Ensures that each takes at least half the container's width */
+    margin: 5px; /* Adds a slight margin for spacing */
+}
+
+.solar-chart-outer-container {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .solar-overview-grid {
+        grid-template-columns: 1fr; /* Stack the charts on smaller screens */
+    }
+}
 
 
 

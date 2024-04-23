@@ -34,7 +34,7 @@ const loadSiteContent = (siteName) => {
     displayWattGaugeSection(siteName);
     displaySiteInfoSection(siteName);
     displayDailyWattsGraph(siteName);
-    displayWattHourSummarySection(siteName);
+    displayWattHourWeekSummaryGraph(siteName);
     
     // Make the site content container visible after loading new content
     document.getElementById('siteContentContainer').style.display = 'block';
@@ -48,35 +48,28 @@ const hideAllContentSections = () => {
 
 // Function to show a content section and perform any initializations
 const showContentSectionById = (sectionId) => {
-    // Hide all sections before showing the targeted one to ensure only one section is visible at a time
+    // Hide all sections to ensure a clean slate
     hideAllContentSections();
     const section = document.getElementById(sectionId);
     if (section) {
-        section.style.display = 'block'; // Show the section if found
-		
-        // Collapse the accordion if navigating back to the home page
+        section.style.display = 'block'; // Make the section visible
+
         if (sectionId === 'homeContent') {
-            // This assumes you are using Bootstrap's collapse feature
-            // Replace '#collapseSchools' with the actual ID of your accordion collapse element
             const accordionElement = document.getElementById('collapseSchools');
-            const bsCollapse = new bootstrap.Collapse(accordionElement, {
-                toggle: false // This ensures the accordion is hidden, not toggled
-            });
-            bsCollapse.hide(); // Explicitly hide the accordion
+            const bsCollapse = new bootstrap.Collapse(accordionElement, {toggle: false});
+            bsCollapse.hide();
         }
 
-        // Perform specific initializations based on the sectionId
         switch (sectionId) {
             case 'solarOverviewContent':
-                // Fetch and display the live watts bar graph
-                displayLiveWattsBarGraph();
-                // Initialize the date picker for the solar overview section
-                initializeDatePicker();
+                displayLiveWattsBarGraph();  // Example function to display live watts graph
+                initializeDatePicker();      // Setup date picker
+                // Setup and load data for the stats table
+                displayStatsTable();  // Function to load data and populate the table
                 break;
-            // Add more cases for other sections if necessary
         }
     } else {
-        console.error(`No section found with ID: ${sectionId}. Check if the ID is correct.`);
+        console.error(`No section found with ID: ${sectionId}`);
     }
 };
 
@@ -106,6 +99,7 @@ const updateActiveNavLink = (activeLink) => {
 // Attach event listeners to navigation links
 document.querySelectorAll('nav .nav-link').forEach(link => {
     link.addEventListener('click', (event) => {
+    	event.preventDefault();
         const targetId = link.getAttribute('data-target');
         if (targetId) {
             event.preventDefault(); // Prevent default link behavior
@@ -131,10 +125,18 @@ document.querySelectorAll('.card .btn').forEach(button => {
 });
 
 // Initialize the website content once the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", function () {
+    // Check and restore the scroll position
+    if (localStorage.getItem('scrollPosition')) {
+        window.scrollTo(0, parseInt(localStorage.getItem('scrollPosition')));
+    }
+
+    // Call existing functions to populate dropdowns, accordions, and set the default view
     populateDropdown(); // Populate the schools dropdown menu
-    populateAccordion(); // Populate the schools accordian
+    populateAccordion(); // Populate the schools accordion
     showContentSectionById('homeContent'); // Show the home content by default
+
+    // Additional initializations can be added here if needed
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -344,7 +346,7 @@ function displaySitePhotoSection(siteName) {
 // Displays the watt gauge section
 function displayWattGaugeSection(siteName) {
 
-	// Select the container where the watt gauge will be displayed
+    // Select the container where the watt gauge will be displayed
     const container = document.getElementById('wattGaugeContainer');
     container.innerHTML = ''; // Clear any existing content
 
@@ -353,18 +355,28 @@ function displayWattGaugeSection(siteName) {
     wattGaugeDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
     wattGaugeDiv.style.position = 'relative';
     wattGaugeDiv.style.height = '100%';
+    container.appendChild(wattGaugeDiv);
 
-    // Create and append the gauge element with an id that JustGage will use
+    // Append the loading spinner to wattGaugeDiv
+    const spinner = createLoadingSpinner();
+    wattGaugeDiv.appendChild(spinner);
+
+    // Create and prepare the gauge element with an id that JustGage will use
     const gaugeElement = document.createElement('div');
     gaugeElement.id = 'gauge';
     gaugeElement.style.width = '100%'; 
     gaugeElement.style.height = '100%';
-    wattGaugeDiv.appendChild(gaugeElement);
-    container.appendChild(wattGaugeDiv);
 
     // Fetch the total watts and then create the JustGage instance
     let gauge; // Hold the gauge instance for redrawing if needed
     fetchTotalWatts(siteName).then(totalWatts => {
+        // Remove the spinner from wattGaugeDiv
+        wattGaugeDiv.removeChild(spinner);
+
+        // Append the gauge element to wattGaugeDiv after data is fetched
+        wattGaugeDiv.appendChild(gaugeElement);
+
+        // Create the JustGage instance inside the gaugeElement
         gauge = new JustGage({
             id: "gauge",
             value: totalWatts,
@@ -381,6 +393,75 @@ function displayWattGaugeSection(siteName) {
         });
     }).catch(error => {
         console.error('Error displaying watt gauge:', error);
+        // Handle error by removing spinner and possibly showing an error message
+        wattGaugeDiv.removeChild(spinner);
+        const errorMsg = document.createElement('div');
+        errorMsg.textContent = 'Failed to load data.';
+        wattGaugeDiv.appendChild(errorMsg);
+    });
+
+    // Redraw gauge on window resize for responsiveness
+    window.addEventListener('resize', function() {
+        if (gauge) {
+            gauge.refresh(gauge.config.value); // Redraw the gauge with the current value
+        }
+    });
+}
+// Displays the watt gauge section
+function displayWattGaugeSection(siteName) {
+
+    // Select the container where the watt gauge will be displayed
+    const container = document.getElementById('wattGaugeContainer');
+    container.innerHTML = ''; // Clear any existing content
+
+    // Create the div that will hold the watt gauge
+    const wattGaugeDiv = document.createElement('div');
+    wattGaugeDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3');
+    wattGaugeDiv.style.position = 'relative';
+    wattGaugeDiv.style.height = '100%';
+    container.appendChild(wattGaugeDiv);
+
+    // Append the loading spinner to wattGaugeDiv
+    const spinner = createLoadingSpinner();
+    wattGaugeDiv.appendChild(spinner);
+
+    // Create and prepare the gauge element with an id that JustGage will use
+    const gaugeElement = document.createElement('div');
+    gaugeElement.id = 'gauge';
+    gaugeElement.style.width = '100%'; 
+    gaugeElement.style.height = '100%';
+
+    // Fetch the total watts and then create the JustGage instance
+    let gauge; // Hold the gauge instance for redrawing if needed
+    fetchTotalWatts(siteName).then(totalWatts => {
+        // Remove the spinner from wattGaugeDiv
+        wattGaugeDiv.removeChild(spinner);
+
+        // Append the gauge element to wattGaugeDiv after data is fetched
+        wattGaugeDiv.appendChild(gaugeElement);
+
+        // Create the JustGage instance inside the gaugeElement
+        gauge = new JustGage({
+            id: "gauge",
+            value: totalWatts,
+            min: 0,
+            max: 1500,
+            title: "Current Watts",
+            titleFontSize: 12,
+            titleFontColor: "black",
+            titleFontFamily: "Arial",
+            pointer: true,
+            gaugeWidthScale: 0.6,
+            counter: true,
+            relativeGaugeSize: true
+        });
+    }).catch(error => {
+        console.error('Error displaying watt gauge:', error);
+        // Handle error by removing spinner and possibly showing an error message
+        wattGaugeDiv.removeChild(spinner);
+        const errorMsg = document.createElement('div');
+        errorMsg.textContent = 'Failed to load data.';
+        wattGaugeDiv.appendChild(errorMsg);
     });
 
     // Redraw gauge on window resize for responsiveness
@@ -653,13 +734,24 @@ function displaySiteInfoSection(siteName) {
     siteInfoDiv.style.flexDirection = 'column';
     siteInfoDiv.style.height = '100%'; // Use 100% of the container height
 
+    // Append the loading spinner to siteInfoDiv
+    const spinner = createLoadingSpinner();
+    siteInfoDiv.appendChild(spinner);
+
     // Display general site information
     fetchSiteInfo(siteName).then(siteInfo => {
+        // Remove the spinner once data is loaded
+        siteInfoDiv.removeChild(spinner);
+
         siteInfoDiv.appendChild(createInfoElement('School Name', siteName));
         siteInfoDiv.appendChild(createInfoElement('Location', siteInfo.location));
         siteInfoDiv.appendChild(createInfoElement('Contact Name', siteInfo.contactName));
         siteInfoDiv.appendChild(createInfoElement('Contact Phone', siteInfo.contactPhone));
         siteInfoDiv.appendChild(createInfoElement('Contact Email', siteInfo.contactEmail));
+    }).catch(error => {
+        console.error('Error fetching site info:', error);
+        siteInfoDiv.removeChild(spinner);
+        siteInfoDiv.appendChild(document.createTextNode('Failed to load site information.'));
     });
 
     // Create a container for the table that will hold system specific information
@@ -692,6 +784,7 @@ function displaySiteInfoSection(siteName) {
         fetchYearInstalled(siteName),
         fetchLimiterStatus(siteName)
     ]).then(([numPanelsMap, systemWattsMap, maxWattsMap, yearInstalledMap, limiterStatusMap]) => {
+        tbody.innerHTML = '';  // Clear previous rows if necessary
         numPanelsMap.forEach((numPanels, systemId) => {
             const row = document.createElement('tr');
             row.appendChild(createCell(systemId));
@@ -702,11 +795,12 @@ function displaySiteInfoSection(siteName) {
             row.appendChild(createCell(limiterStatusMap.get(systemId)));
             tbody.appendChild(row);
         });
-        // Now that data is loaded, append the table to the table container
+        // Append the table to the table container once all data is loaded
         tableContainer.appendChild(table);
     })
     .catch(error => {
         console.error('Error fetching system information:', error);
+        tbody.innerHTML = '<tr><td colspan="6">Failed to load system data.</td></tr>'; // Show error in table
     });
 
     // Append the site info div to the container
@@ -755,36 +849,58 @@ function fetchSiteDayWatts(siteName) {
     });
 }
 
+// Helper function to create a loading spinner
+function createLoadingSpinner() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading-spinner';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner-border text-secondary';
+    spinner.setAttribute('role', 'status');
+    loadingDiv.appendChild(spinner);
+    return loadingDiv;
+}
+
+// Creates containers to store graphs like watt summary and watt hour summary graphs
+function createGraphContainers(rootId, outerContainerId, chartContainerId) {
+    // Get the root element based on passed ID
+    const root = document.getElementById(rootId);
+    root.innerHTML = ''; // Clear existing content to prepare for new content
+
+    // Create a main container for all graph-related data
+    const outerContainer = document.createElement('div');
+    outerContainer.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3', 'd-flex', 'flex-column');
+    outerContainer.style.height = '100%'; // Make sure it uses all available vertical space in its parent
+
+    // Create a specific container for the chart, designed to adapt to content dynamically
+    const chartContainer = document.createElement('div');
+    chartContainer.id = chartContainerId;
+    chartContainer.classList.add('border', 'rounded', 'bg-white', 'p-3', 'flex-grow-1', 'd-flex', 'justify-content-center', 'align-items-center');
+
+    // Create and append a loading spinner to indicate loading state
+    const loadingDiv = createLoadingSpinner();
+    chartContainer.appendChild(loadingDiv);
+
+    // Build the hierarchy by adding the chart container to the outer container
+    outerContainer.appendChild(chartContainer);
+
+    // Finally, add the outer container to the root element
+    root.appendChild(outerContainer);
+}
+
 // Displays the daily watts line graph 
 function displayDailyWattsGraph(siteName) {
+    // Use the createGraphContainers function to setup the UI structure
+    createGraphContainers('wattsTimeChartContainer', 'dailyWattsOuterContainer', 'dailyWattsChartContainer');
 
-	const root = document.getElementById('wattsTimeChartContainer');
-    root.innerHTML = ''; // Clear existing content
-
-    // Create a container to store all data
-    const dailyWattsChartDiv = document.createElement('div');
-    dailyWattsChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3', 'd-flex', 'flex-column');
-    dailyWattsChartDiv.style.height = '100%'; // Ensure it fills the parent container
-
-    // Create another div for the chart, adapting it for dynamic height
-    const chartBoxContainer = document.createElement('div');
-    chartBoxContainer.id = 'dailyWattsChartContainer';
-    chartBoxContainer.classList.add('border', 'rounded', 'bg-white', 'p-3', 'flex-grow-1', 'd-flex', 'justify-content-center', 'align-items-center');
-    // Allows it to grow and fill available space, adjusting to dynamic height
-
-    // Create and insert a loading spinner
-    const loadingDiv = createLoadingSpinner();
-    chartBoxContainer.appendChild(loadingDiv);
-
-    // Append the chartBoxContainer to the dailyWattsChartDiv
-    dailyWattsChartDiv.appendChild(chartBoxContainer);
-
-    // Append the entire dailyWattsChartDiv to the root
-    root.appendChild(dailyWattsChartDiv);
+    // Get the chart container where the chart will be appended
+    const chartBoxContainer = document.getElementById('dailyWattsChartContainer');
     
     fetchSiteDayWatts(siteName).then(dailyWattMap => {
-    	// Remove the loading spinner
-        chartBoxContainer.removeChild(loadingDiv);
+        // Remove the loading spinner first
+        const loadingDiv = chartBoxContainer.querySelector('.loading-spinner');
+        if (loadingDiv) {
+            chartBoxContainer.removeChild(loadingDiv);
+        }
         
         // Preparing the canvas and datasets
         const canvas = document.createElement('canvas');
@@ -835,15 +951,15 @@ function displayDailyWattsGraph(siteName) {
                 datasets: datasets
             },
             options: {
-            	responsive: true,
-            	maintainAspectRatio: true, // Set to true to respect the aspect ratio
-            	aspectRatio: 2, // Define the aspect ratio of the chart
-    			plugins: {
-					title: {
-						display: true,
-						text: 'Watt Summary for ' + todaysDate(),
-					}
-				},
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Watt Summary for ' + todaysDate(),
+                    }
+                },
                 scales: {
                     x: {
                         title: {
@@ -863,10 +979,10 @@ function displayDailyWattsGraph(siteName) {
 
     }).catch(error => {
         console.error('Error creating line graph:', error);
-        // Update the UI to show an error message instead of the spinner
         chartBoxContainer.innerHTML = '<p>Error loading data. Please try again later.</p>';
     });
 }
+
 
 // Helper function to generate random colors
 function getRandomColor() {
@@ -982,115 +1098,75 @@ function formatDateWithDay(dateString) {
     return `${dayName}, ${monthName} ${dayOfMonth}`;
 }
 
+
+// Displays the watt hour week summary bar graph
 function displayWattHourWeekSummaryGraph(siteName) {
-	
+    // Set up the containers and loading spinner
+    createGraphContainers('graphSection', 'wattHourChartDiv', 'chartContainer');
+
+    // After the containers are setup, fetch and display the chart
     const graphContainer = document.getElementById('chartContainer');
     graphContainer.innerHTML = '';  // Clear any previously displayed content
 
-    // Create a loading spinner and display it while fetching data
     const loadingDiv = createLoadingSpinner();
     graphContainer.appendChild(loadingDiv);
 
-    // Fetch weekly watt hours data
-    fetchWattHoursForWeek(siteName)
-        .then(weeklyWattMap => {
-            graphContainer.removeChild(loadingDiv);  // Remove the loading spinner once data is fetched
+    fetchWattHoursForWeek(siteName).then(weeklyWattMap => {
+        graphContainer.removeChild(loadingDiv);  // Remove the loading spinner
 
-            // Prepare the data for the chart
-            const labels = Array.from(weeklyWattMap.keys()).reverse().map(formatDateWithDay);
-            const dataPoints = Array.from(weeklyWattMap.values()).reverse();
+        const labels = Array.from(weeklyWattMap.keys()).reverse().map(formatDateWithDay);
+        const dataPoints = Array.from(weeklyWattMap.values()).reverse();
 
-            // Create a canvas for the chart and add it to the DOM
-            const canvas = document.createElement('canvas');
-            graphContainer.appendChild(canvas);
-            const ctx = canvas.getContext('2d');
+        const canvas = document.createElement('canvas');
+        graphContainer.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
 
-            // Initialize the Chart.js bar chart
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Watt Hours',
-                        data: dataPoints,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Watt Hours',
+                    data: dataPoints,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Watt Hour Summary for Last Week'
+                    }
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
+                scales: {
+                    x: {
                         title: {
                             display: true,
-                            text: 'Watt Hour Summary for Last Week'
+                            text: 'Day'
                         }
                     },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Day'
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Watt Hours'
-                            }
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Watt Hours'
                         }
                     }
                 }
-            });
-        })
-        .catch(error => {
-            console.error('Error displaying watt hour week summary graph:', error);
-            graphContainer.innerHTML = '<p>Error loading data. Please try again later.</p>';
+            }
         });
-}
-
-// Helper function to create a loading spinner
-function createLoadingSpinner() {
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'loading-spinner';
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner-border text-secondary';
-    spinner.setAttribute('role', 'status');
-    loadingDiv.appendChild(spinner);
-    return loadingDiv;
-}
-
-// Sets up graph container with buttons and displays the weekly watt hour chart by default
-function displayWattHourSummarySection(siteName) {
-    const root = document.getElementById('graphSection');
-    root.innerHTML = ''; // Clear existing content
-
-    // Create a container to store all data
-    const wattHourChartDiv = document.createElement('div');
-    wattHourChartDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'mt-3', 'mb-3', 'd-flex', 'flex-column');
-    wattHourChartDiv.style.height = '100%'; // Ensure it fills the parent container
-
-    // Create another div for the chart, adapting it for dynamic height
-    const chartBoxContainer = document.createElement('div');
-    chartBoxContainer.id = 'chartContainer';
-    chartBoxContainer.classList.add('border', 'rounded', 'bg-white', 'p-3', 'flex-grow-1', 'd-flex', 'justify-content-center', 'align-items-center');
-    // Allows it to grow and fill available space, adjusting to dynamic height
-
-    // Append the chartBoxContainer to the wattHourChartDiv
-    wattHourChartDiv.appendChild(chartBoxContainer);
-
-    // Append the entire wattHourChartDiv to the root
-    root.appendChild(wattHourChartDiv);
-
-    // Display the weekly watt hour chart by default
-    displayWattHourWeekSummaryGraph(siteName);
+    }).catch(error => {
+        console.error('Error displaying watt hour week summary graph:', error);
+        graphContainer.innerHTML = '<p>Error loading data. Please try again later.</p>';
+    });
 }
 
 /*
 	--------------------------------------------------------------------------------------
 	The code below is for the solar overview section. 
-	Pick back up here.
 	--------------------------------------------------------------------------------------
 */
 
@@ -1275,24 +1351,19 @@ function updateWattHoursChart(date) {
 // Global variable specific to the watt hours chart
 let showAllSitesWattHours = false;
 
-// Function to display the loading spinner in a container
+// This function creates and displays a loading spinner within a given container
 function displayLoadingSpinner(containerId) {
     const container = document.getElementById(containerId);
-    if (container) {
-        container.innerHTML = ''; // Clear the container
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'loading-spinner';
-        const spinner = document.createElement('div');
-        spinner.className = 'spinner-border text-secondary';
-        spinner.setAttribute('role', 'status');
-        const spinnerText = document.createElement('span');
-        spinnerText.className = 'visually-hidden';
-        spinnerText.innerText = 'Loading...';
-        spinner.appendChild(spinnerText);
-        loadingDiv.appendChild(spinner);
-        container.appendChild(loadingDiv);
-        container.style.display = 'block';
-    }
+    container.innerHTML = ''; // Clear the container
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading-spinner';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner-border text-secondary'; // Changed to 'text-light' to be visible against dark bg
+    spinner.setAttribute('role', 'status');
+    const spinnerText = document.createElement('span');
+    spinnerText.className = 'visually-hidden'; 
+    loadingDiv.appendChild(spinner);
+    container.appendChild(loadingDiv);
 }
 
 // Function to display the watt hour bar chart for all sites in a container
@@ -1334,6 +1405,7 @@ function displayWattHoursBarChart(data) {
     });
 
     let toggleButton = document.getElementById('toggleWattHoursButton');
+    toggleButton.classList.add('btn', 'btn-secondary');
     toggleButton.textContent = showAllSitesWattHours ? "Show Active Sites Only" : "Show All Sites";
     toggleButton.onclick = function() {
         showAllSitesWattHours = !showAllSitesWattHours;
@@ -1387,36 +1459,194 @@ function getChartOptions(title) {
 
 // Returns current live watts for the entire country
 function fetchLiveWattsForCountry() {
-	let liveWatts = 0;
-	return getLiveWattsBySchool().then(data => {
-		data.forEach(watts => {
-			liveWatts += watts; // Sum up the live watts from each school
-		});
-		// console.log(liveWatts);
-		return liveWatts;
-	}).catch(error => {
-		console.error('Failed to fetch live watts:', error);
-		throw error;
-	});
-}
-
-// Returns watt hours for the entire country today
-function fetchTotalWattHoursForToday() {
-    const today = new Date();
-    // Format date as 'YYYY-MM-DD' expected by getTotalWattHoursForDate
-    const dateString = today.toISOString().split('T')[0];
-    
-    let totalWattHours = 0;
-    return getTotalWattHoursForDate(dateString).then(wattHoursBySchool => {
-        wattHoursBySchool.forEach(wattHours => {
-        	totalWattHours += wattHours;
-        })
-        //console.log('Total watt hours for all sites:', totalWattHours);
-        return totalWattHours;
+    let liveWatts = 0; 
+    // Fetch live watts from all schools and process the data
+    return getLiveWattsBySchool().then(schoolWattsMap => {
+        schoolWattsMap.forEach((watts, schoolName) => {
+            liveWatts += watts; // Sum up the live watts from each school
+        });
+        return liveWatts; // Return the total watts
     }).catch(error => {
-        console.error('Failed to calculate total watt hours for today:', error);
-        throw error;
+        throw error; 
     });
 }
 
 
+// Returns watt hours for the entire country today
+function fetchTotalWattHoursForToday() {
+    const today = new Date();
+    // Format date as 'YYYY-MM-DD'
+    const dateString = today.toISOString().split('T')[0];
+    
+    let totalWattHours = 0;  
+    // Fetch watt hours data for the given date from all schools
+    return getTotalWattHoursForDate(dateString).then(wattHoursBySchool => {
+        wattHoursBySchool.forEach(wattHours => {
+            totalWattHours += wattHours;  // Sum up the watt hours
+        });
+        return totalWattHours;  // Return total watt hours
+    }).catch(error => {
+        throw error; 
+    });
+}
+
+// Returns the total money produced from watt hours in Belize dollars for today
+function fetchTotalMoneyProducedTodayBZD() {
+    const pricePerWattHour = 0.00044;  // Rate in BZD per watt hour
+
+    return fetchTotalWattHoursForToday().then(totalWattHours => {
+        const totalMoneyProducedBZD = totalWattHours * pricePerWattHour;  // Calculate total money
+        console.log("BZD: $",totalMoneyProducedBZD);
+        return totalMoneyProducedBZD;  // Return the money produced in Belize dollars
+    }).catch(error => {
+        console.error('Failed to calculate total money produced for today in BZD:', error);
+        throw error;  
+    });
+}
+
+// Returns the total money produced from watt hours in US dollars for today
+function fetchTotalMoneyProducedTodayUSD() {
+    const pricePerWattHourUSD = 0.00022;  // Rate in USD per watt hour
+
+    return fetchTotalWattHoursForToday().then(totalWattHours => {
+        const totalMoneyProducedUSD = totalWattHours * pricePerWattHourUSD;  // Calculate total money in USD
+        console.log("USD: $",totalMoneyProducedUSD);
+        return totalMoneyProducedUSD;  // Return the money produced in US dollars
+    }).catch(error => {
+        console.error('Failed to calculate total money produced for today in USD:', error);
+        throw error;  
+    });
+}
+
+function fetchEquivalentCoalBurned() {
+    const energyPerKgCoal = 24;  // MJ/kg
+    const wattHourToMegajoule = 0.0036;  // Convert watt-hours to megajoules
+
+    // Fetch the total watt-hours for today
+    return fetchTotalWattHoursForToday().then(totalWattHours => {
+        // Convert the total watt-hours to megajoules
+        const totalMegajoules = totalWattHours * wattHourToMegajoule;
+        // Calculate the kilograms of coal equivalent
+        const kgCoal = totalMegajoules / energyPerKgCoal;
+        console.log(`Equivalent kilograms of coal needed to produce ${totalWattHours} Wh: ${kgCoal.toFixed(2)} kg`);
+        return kgCoal;  // Return the equivalent kg of coal
+    }).catch(error => {
+        console.error('Failed to calculate the equivalent coal burned:', error);
+        throw error;
+    });
+}
+
+function fetchEquivalentNumberOfTrees() {
+    const co2PerKWh = 0.85;  // kg CO2 per kWh of coal energy
+    const co2AbsorptionPerTreePerYear = 21.77;  // kg CO2 absorbed per tree per year
+
+    // Use fetchTotalWattHoursForToday to get the total energy produced in watt-hours and convert it to kWh
+    return fetchTotalWattHoursForToday().then(totalWattHours => {
+        const totalKWh = totalWattHours / 1000;  // Convert watt-hours to kilowatt-hours
+        // Calculate the total CO2 emissions that would have been produced using coal
+        const totalCO2Saved = totalKWh * co2PerKWh;
+        // Calculate how many trees would be required to absorb that CO2 in one year
+        const numberOfTrees = totalCO2Saved / co2AbsorptionPerTreePerYear;
+        console.log(`Number of trees needed to offset CO2 emissions for ${totalWattHours} Wh: ${numberOfTrees.toFixed(2)}`);
+        return numberOfTrees;  // Return the number of trees
+    }).catch(error => {
+        console.error('Failed to calculate the equivalent number of trees:', error);
+        throw error;
+    });
+}
+
+function fetchCarbonCreditsEarned() {
+    const co2PerKWh = 0.85; // kg CO2 per kWh avoided by using solar power
+    const creditPerTonCO2 = 20; // USD per tonne of CO2
+    const usdToBzdRate = 2.0;  // Example conversion rate, should be updated with current rates
+
+    return fetchTotalWattHoursForToday().then(totalWattHours => {
+        const totalCO2Avoided = (totalWattHours / 1000) * co2PerKWh; // Convert Wh to kWh and calculate CO2 avoided
+        const carbonCreditsUSD = (totalCO2Avoided / 1000) * creditPerTonCO2; // Calculate credits in USD
+        const carbonCreditsBZD = carbonCreditsUSD * usdToBzdRate; // Convert credits to BZD
+
+        console.log("Carbon credits earned today: $", carbonCreditsUSD.toFixed(2), "USD (", carbonCreditsBZD.toFixed(2), "BZD)");
+        return {usd: carbonCreditsUSD, bzd: carbonCreditsBZD};  // Return both USD and BZD values
+    }).catch(error => {
+        console.error('Failed to calculate carbon credits earned:', error);
+        throw error;  
+    });
+}
+
+// This function creates a table and populates it with the fetched data
+function displayStatsTable() {
+    // Select the container where the table will be displayed
+    const container = document.getElementById('statsTableContainer');
+    container.innerHTML = '';  // Clear previous content
+    
+    // Create a container to store all data
+    const tableDiv = document.createElement('div');
+    tableDiv.classList.add('p-3', 'border', 'rounded', 'bg-light', 'd-flex', 'flex-column');
+    tableDiv.style.height = '100%'; // Ensure it fills the parent container
+    
+    // Display the loading spinner first
+    const loadingDiv = createLoadingSpinner();
+    tableDiv.appendChild(loadingDiv);
+    container.appendChild(tableDiv); // Append the div with the loading spinner to the container
+
+    // Data fetching promises
+    const promises = [
+        fetchLiveWattsForCountry(),
+        fetchTotalWattHoursForToday(),
+        fetchTotalMoneyProducedTodayBZD(),
+        fetchTotalMoneyProducedTodayUSD(),
+        fetchEquivalentCoalBurned(),
+        fetchEquivalentNumberOfTrees(),
+        fetchCarbonCreditsEarned()
+    ];
+
+    // Execute all promises and process the data
+    Promise.all(promises).then(results => {
+        // Remove the spinner as data is ready to be displayed
+        tableDiv.removeChild(loadingDiv);
+
+        const [liveWatts, totalWattHours, moneyProducedBZD, moneyProducedUSD, coalBurned, numberOfTrees, carbonCredits] = results;
+
+        // Create table elements
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-dark', 'table-striped');
+
+        const thead = document.createElement('thead');
+        thead.innerHTML = '<tr><th>Metric</th><th>Value</th><th>Unit</th></tr>';
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        // Add rows to the table body
+        const stats = [
+            { metric: 'Live Watts', value: liveWatts, unit: 'W' },
+            { metric: 'Total Watt Hours', value: totalWattHours, unit: 'Wh' },
+            { metric: 'Total Money Produced (BZD)', value: moneyProducedBZD.toFixed(2), unit: 'BZD' },
+            { metric: 'Total Money Produced (USD)', value: moneyProducedUSD.toFixed(2), unit: 'USD' },
+            { metric: 'Equivalent Coal Burned', value: coalBurned.toFixed(2), unit: 'kg' },
+            { metric: 'Equivalent Number of Trees', value: numberOfTrees.toFixed(2), unit: 'trees' },
+            { metric: 'Carbon Credits Earned (BZD)', value: carbonCredits.bzd.toFixed(2), unit: 'BZD' },
+            { metric: 'Carbon Credits Earned (USD)', value: carbonCredits.usd.toFixed(2), unit: 'USD' }
+        ];
+
+        stats.forEach(stat => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${stat.metric}</td><td>${stat.value}</td><td>${stat.unit}</td>`;
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+
+        // Append the table to the div that was holding the spinner
+        tableDiv.appendChild(table);
+    }).catch(error => {
+        console.error('Error loading statistics data:', error);
+        // Clear the spinner and display error message
+        tableDiv.removeChild(loadingDiv);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-danger';
+        errorMessage.setAttribute('role', 'alert');
+        errorMessage.textContent = 'Error loading data. Please try again later.';
+        tableDiv.appendChild(errorMessage);
+    });
+}
