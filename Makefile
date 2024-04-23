@@ -1,9 +1,8 @@
 # Makefile to deploy Belize solar information system
-# Server using Python Microservice
 
 # Required setup commands:
-#sudo mkdir /var/www/html/BelizeSolar
-#sudo chown -R ubuntu:www-data /var/www/html/BelizeSolar
+# sudo mkdir /var/www/html/BelizeSolar
+# sudo chown -R ubuntu:www-data /var/www/html/BelizeSolar
 
 all: PutHTML
 
